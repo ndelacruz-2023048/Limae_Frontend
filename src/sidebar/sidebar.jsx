@@ -5,7 +5,7 @@ import { LinksSidebar } from "../utils/DataEstatica";
 
 const icons = [
   { name: "mdi:view-dashboard-outline", active: false },
-  { name: "mdi:book-outline", active: true },
+  { name: "mdi:book-outline", active: false },
   { name: "mdi:file-document-outline", active: false },
   { name: "mdi:image-outline", active: false },
   { name: "mdi:chat-outline", active: false },

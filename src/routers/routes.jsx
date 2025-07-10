@@ -7,6 +7,7 @@ import { AddNoticePage } from '../page/AddNoticePage'
 import { DetailsNoticePage } from '../page/DetailsNoticePage'
 import { DashboardAlumnos } from '../components/organismos/Usuarios/DashboardAlumnos'
 import EditNoticePage from '../page/EditNoticePage'
+import { DashboardForm } from '../page/DashboardForms'
 
 const router = createBrowserRouter([
     {
@@ -44,6 +45,10 @@ const router = createBrowserRouter([
             {
                 path: "/edit-notice",
                 element: <EditNoticePage />
+            }
+            {
+                path:"/dashboard-formulario",
+                element:<DashboardForm/>
             }
         ]
     }
