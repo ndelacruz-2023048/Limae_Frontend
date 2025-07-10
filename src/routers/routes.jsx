@@ -4,6 +4,7 @@ import { DetalleReporte } from '../page/DetalleReporte'
 import { DashboardReportesPage } from '../page/DashboardReportesPage'
 import { LoginPage } from '../page/LoginPage'
 import { ProtectedRoutes } from '../hooks/ProtectedRoutes'
+import { RegisterPage } from '../page/RegisterPage'
 
 const router = createBrowserRouter([
     {
@@ -28,6 +29,14 @@ const router = createBrowserRouter([
     {
         path: '/login',
         element: <ProtectedRoutes accesBy="non-authenticated"><LoginPage/></ProtectedRoutes>,
+    },
+    {
+        path: '/register',
+        element: <ProtectedRoutes accesBy="non-authenticated"><RegisterPage/></ProtectedRoutes>,
+    },
+    {
+        path: '/*',
+        element: <div>404 not found</div>
     }
 ])
 
