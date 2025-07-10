@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router'
 import { Layout } from '../layout/Layout'
 import { DetalleReporte } from '../page/DetalleReporte'
 import { DashboardReportesPage } from '../page/DashboardReportesPage'
+import { DashboardForm } from '../page/DashboardForms'
 
 const router = createBrowserRouter([
     {
@@ -21,6 +22,10 @@ const router = createBrowserRouter([
                 path:"/dashboard-reportes",
                 element:<DashboardReportesPage/>
             },
+            {
+                path:"/dashboard-formulario",
+                element:<DashboardForm/>
+            }
         ]
     }
 ])
