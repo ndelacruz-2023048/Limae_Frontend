@@ -1,16 +1,17 @@
-import React from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router'
 import { Layout } from '../layout/Layout'
 import { DetalleReporte } from '../page/DetalleReporte'
 import { DashboardReportesPage } from '../page/DashboardReportesPage'
+import { LoginPage } from '../page/LoginPage'
+import { ProtectedRoutes } from '../hooks/ProtectedRoutes'
 
 const router = createBrowserRouter([
     {
         path:"/",
-        element:<Layout/>,
+        element:<ProtectedRoutes accesBy="authenticated"><Layout/></ProtectedRoutes>,
         children:[
             {
-                path:"/home",
+                index: true,
                 element:<h1>Home</h1>
             },
             {
@@ -21,7 +22,12 @@ const router = createBrowserRouter([
                 path:"/dashboard-reportes",
                 element:<DashboardReportesPage/>
             },
-        ]
+        ],
+        errorElement:<h1>Error</h1>
+    },
+    {
+        path: '/login',
+        element: <ProtectedRoutes accesBy="non-authenticated"><LoginPage/></ProtectedRoutes>,
     }
 ])
 

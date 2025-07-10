@@ -2,12 +2,15 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import MyRouter from './routers/routes'
+import { AuthContextProvider } from './context/AuthContext'
 
 function App() {
-  const [count, setCount] = useState(0)
+  //Funcion Socket
 
   return (
-    <MyRouter/>
+    <AuthContextProvider>
+      <MyRouter/>
+    </AuthContextProvider>
   )
 }
 
