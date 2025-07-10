@@ -27,7 +27,10 @@ export const NoticeMain = () => {
           {/* Featured Post */}
           <div className="flex-1">
             {featuredPost && (
-              <div className="rounded-xl overflow-hidden shadow-lg relative h-64 md:h-80">
+              <div
+                className="rounded-xl overflow-hidden shadow-lg relative h-64 md:h-80 cursor-pointer"
+                onClick={() => navigate('/details-notice', { state: { post: featuredPost } })}
+              >
                 <img
                   src={featuredPost.imagen || featuredPost.fotografia || 'https://via.placeholder.com/600x400'}
                   alt={featuredPost.titulo}
@@ -44,14 +47,22 @@ export const NoticeMain = () => {
             )}
           </div>
           {/* Sidebar */}
-          <div className="w-full md:w-80">
+          <div className="w-full md:w-96">
             <div className="bg-white rounded-xl shadow p-4">
               <h3 className="font-semibold text-lg mb-4">Otras noticias</h3>
               <ul className="space-y-3">
-                {otherPosts.map((title, idx) => (
-                  <li key={idx} className="flex items-center gap-3">
-                    <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                    <span className="text-sm text-gray-700 hover:underline cursor-pointer">{title}</span>
+                {notices.slice(1).map((notice, idx) => (
+                  <li
+                    key={idx}
+                    className="flex items-center gap-4 cursor-pointer hover:underline"
+                    onClick={() => navigate('/details-notice', { state: { post: notice } })}
+                  >
+                    <img
+                      src={notice.imagen || notice.fotografia || 'https://via.placeholder.com/60x40'}
+                      alt={notice.titulo}
+                      className="w-25 h-20 object-cover rounded"
+                    />
+                    <span className="text-sm text-gray-700">{notice.titulo}</span>
                   </li>
                 ))}
               </ul>

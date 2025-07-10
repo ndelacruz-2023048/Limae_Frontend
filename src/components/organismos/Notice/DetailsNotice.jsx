@@ -1,10 +1,10 @@
 import React from "react";
 import { useLocation } from "react-router";
+import logo from "../../../assets/logo.png"; // Ajusta si la ruta cambia
 
 export const DetailsNotice = () => {
   const location = useLocation();
   const post = location.state?.post;
-  
 
   const noticeData = post || {
     titulo: "Moscú está entre los mejores mercados navideños del mundo",
@@ -28,38 +28,50 @@ export const DetailsNotice = () => {
     : [];
 
   return (
-    <div className="bg-gray-50 min-h-screen p-6 flex flex-col md:flex-row gap-6 overflow-x-hidden">
-      {/* Texto */}
-      <div className="flex-1 bg-white rounded-xl shadow p-8 flex flex-col max-w-full min-w-[300px] w-full overflow-x-hidden break-words">
-        <div className="w-full">
-          <span className="text-teal-500 font-bold text-xs tracking-widest">{noticeData.autor}</span>
-          <span className="float-right text-gray-400 text-xs font-medium">{new Date(noticeData.fecha).toLocaleDateString()}</span>
-          <h1 className="text-3xl md:text-4xl font-extrabold mt-4 mb-2 text-gray-900">{noticeData.titulo}</h1>
-          <blockquote className="border-l-4 border-orange-400 pl-4 italic text-gray-700 mb-4 text-base">
-            {noticeData.entrada}
-          </blockquote>
-          {cuerpoArray.map((p, idx) => (
-            <p key={idx} className="text-gray-600 mb-3 text-base">{p}</p>
-          ))}
+    <div className="bg-gray-50 min-h-screen h-screen p-6 pt-4 flex flex-col gap-6 overflow-x-hidden">
+      {/* Contenido principal */}
+      <div className="flex flex-col md:flex-row gap-6 flex-1 overflow-hidden">
+        {/* Texto */}
+        <div className="flex-1 bg-white rounded-xl shadow p-8 flex flex-col max-w-full min-w-[300px] w-full overflow-x-hidden break-words">
+          {/* Logo dentro del contenido */}
+          <div className="mb-4">
+            <img src={logo} alt="Logo" className="w-20 h-auto" />
+          </div>
+
+          <div className="w-full">
+            <span className="text-teal-500 font-bold text-xs tracking-widest">{noticeData.autor}</span>
+            <span className="float-right text-gray-400 text-xs font-medium">
+              {new Date(noticeData.fecha).toLocaleDateString()}
+            </span>
+            <h1 className="text-3xl md:text-4xl font-extrabold mt-4 mb-2 text-gray-900">
+              {noticeData.titulo}
+            </h1>
+            <blockquote className="border-l-4 border-orange-400 pl-4 italic text-gray-700 mb-4 text-base">
+              {noticeData.entrada}
+            </blockquote>
+            {cuerpoArray.map((p, idx) => (
+              <p key={idx} className="text-gray-600 mb-3 text-base">
+                {p}
+              </p>
+            ))}
+          </div>
+        </div>
+
+        {/* Imagen */}
+        <div className="md:w-1/2 min-w-[300px] w-full max-w-full h-full">
+          <div className="relative h-full rounded-xl overflow-hidden shadow-lg">
+            <img
+              src={noticeData.fotografia}
+              alt={noticeData.titulo}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
+              <div className="text-white font-semibold text-lg">{noticeData.titulo}</div>
+              <div className="text-gray-200 text-xs">{noticeData.entrada}</div>
+            </div>
+          </div>
         </div>
       </div>
-
-      {/* Imagen */}
-      <div className="md:w-1/2 min-w-[300px] w-full max-w-full">
-  <div className="relative h-[400px] rounded-xl overflow-hidden shadow-lg">
-    <img
-      src={noticeData.fotografia}
-      alt={noticeData.titulo}
-      className="w-full h-full object-cover"
-    />
-    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent p-4">
-      <div className="text-white font-semibold text-lg">{noticeData.titulo}</div>
-      <div className="text-gray-200 text-xs">{noticeData.entrada}</div>
-    </div>
-  </div>
-</div>
-
-
     </div>
   );
 };
