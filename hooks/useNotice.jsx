@@ -1,5 +1,7 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
+import { useUploadImage } from "../src/utils/useUploadImage";
+import { useUploadImageStore } from "../src/stores/UploadImageStore";
 
 export const useNotice = (navigate) => {
   const [form, setForm] = useState({
@@ -12,20 +14,25 @@ export const useNotice = (navigate) => {
     etiquetas: [],
     fotografia: '',
   });
+  /*Codigo para subir imagen en la nube */
+  const {dataImage,isLoadingImage,registerImage} = useUploadImage()
+  const {dataImageFile} = useUploadImageStore()
 
   const [etiquetaInput, setEtiquetaInput] = useState('');
   const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
 
-  const handleChange = (e) => {
+  const handleChange = async(e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0];
-    setFile(selectedFile);
-    setForm((prev) => ({ ...prev, fotografia: selectedFile?.name || '' }));
+
+  const handleFileChange = async(image) => {
+    {/*const response = await registerImage(dataImageFile)
+    setFile(response?.responseImage?.secure_url)
+    console.log(file);*/}
+    setForm((prev) => ({ ...prev, fotografia: image }));
   };
 
   const handleAddEtiqueta = () => {
@@ -46,7 +53,16 @@ export const useNotice = (navigate) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3660/api/v1/noticias/agregarN', form);
+      console.log("anda subiendo la imagen");
+      const response = await registerImage(dataImageFile)
+      console.log("ya subio la imagen");
+      console.log(response);
+      
+      const updatedForm = { ...form, fotografia: response?.responseImage?.secure_url };
+      setForm(updatedForm);
+      console.log('Form actualizado:', updatedForm);
+      
+      await axios.post('http://localhost:3660/api/v1/noticias/agregarN', updatedForm);
       alert('Noticia agregada correctamente');
       navigate('/notices'); // redirige después de éxito
       setForm({

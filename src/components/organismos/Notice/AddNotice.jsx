@@ -1,8 +1,12 @@
 import { useNavigate } from 'react-router-dom';
 import { useNotice } from '../../../../hooks/useNotice';
+import { UploadImage } from '../../moleculas/UploadImage/UploadImage';
+import { Loading } from '../../moleculas/Loading';
+import { useUploadImageStore } from '../../../stores/UploadImageStore';
 
 export const AddNotice = () => {
   const navigate = useNavigate();
+  const {isUploadingImage} = useUploadImageStore()
   const {
     form,
     file,
@@ -17,8 +21,9 @@ export const AddNotice = () => {
   } = useNotice(navigate);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white rounded-xl shadow-md overflow-hidden">
+    <div className=" bg-gray-50 flex items-center justify-center p-4  overflow-y-auto h-[100%]">
+      {isUploadingImage && <Loading/>}
+      <div className="w-full max-w-2xl bg-white rounded-xl shadow-md ">
         <div className="p-1 bg-blue-500"></div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
@@ -146,23 +151,9 @@ export const AddNotice = () => {
           <div className="space-y-2">
             <h2 className="text-lg font-semibold text-gray-800">Fotografía</h2>
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
-              onClick={() => fileInputRef.current.click()}
+              className="flex h-[100px] border-2 border-dashed border-gray-300 rounded-lg  text-center cursor-pointer hover:border-blue-400 transition-colors"
             >
-              <input
-                type="file"
-                ref={fileInputRef}
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              {file ? (
-                <p className="text-blue-500 font-medium">{file.name}</p>
-              ) : (
-                <>
-                  <p className="text-gray-600 mb-1">Haz clic para seleccionar imagen</p>
-                  <p className="text-sm text-gray-500">PNG, JPG (máx. 5MB)</p>
-                </>
-              )}
+              <UploadImage handleChange={handleFileChange}/>
             </div>
           </div>
 
