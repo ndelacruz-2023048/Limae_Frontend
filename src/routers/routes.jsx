@@ -6,6 +6,7 @@ import { NoticeMainPage } from '../page/NoticeMainPage'
 import { AddNoticePage } from '../page/AddNoticePage'
 import { DetailsNoticePage } from '../page/DetailsNoticePage'
 import { DashboardAlumnos } from '../components/organismos/Usuarios/DashboardAlumnos'
+import EditNoticePage from '../page/EditNoticePage'
 
 const router = createBrowserRouter([
     {
@@ -39,6 +40,10 @@ const router = createBrowserRouter([
             {
                 path:"/dashboard-usuario",
                 element: <DashboardAlumnos />
+            },
+            {
+                path: "/edit-notice",
+                element: <EditNoticePage />
             }
         ]
     }
