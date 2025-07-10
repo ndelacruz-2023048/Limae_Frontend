@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+const API_URL = import.meta.env.VITE_API_URL
 
 export const useFetchNotices = () => {
   const [notices, setNotices] = useState([]);
@@ -10,7 +11,7 @@ export const useFetchNotices = () => {
     const fetchNotices = async () => {
       try {
         setLoading(true);
-        const res = await axios.get('http://localhost:3660/api/v1/noticias/obtenerN');
+        const res = await axios.get(`${API_URL}/api/v1/noticias/obtenerN`);
         setNotices(Array.isArray(res.data.noticias) ? res.data.noticias : []);
  // <-- aquí asignas el array correcto
       } catch (err) {

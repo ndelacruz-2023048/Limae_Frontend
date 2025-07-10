@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { useUploadImage } from "../src/utils/useUploadImage";
 import { useUploadImageStore } from "../src/stores/UploadImageStore";
+const API_URL = import.meta.env.VITE_API_URL
 
 export const useNotice = (navigate) => {
   const [form, setForm] = useState({
@@ -62,7 +63,7 @@ export const useNotice = (navigate) => {
       setForm(updatedForm);
       console.log('Form actualizado:', updatedForm);
       
-      await axios.post('http://localhost:3660/api/v1/noticias/agregarN', updatedForm);
+      await axios.post(`${API_URL}/api/v1/noticias/agregarN`, updatedForm);
       alert('Noticia agregada correctamente');
       navigate('/notices'); // redirige después de éxito
       setForm({
