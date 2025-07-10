@@ -3,6 +3,7 @@ import { useNotice } from '../../../../hooks/useNotice';
 import { UploadImage } from '../../moleculas/UploadImage/UploadImage';
 import { Loading } from '../../moleculas/Loading';
 import { useUploadImageStore } from '../../../stores/UploadImageStore';
+import { PreviewNotice } from './PreviewNotice';
 
 export const AddNotice = () => {
   const navigate = useNavigate();
@@ -23,8 +24,8 @@ export const AddNotice = () => {
   return (
     <div className=" bg-gray-50 flex items-center justify-center p-4 overflow-y-auto h-full w-full">
       {isUploadingImage && <Loading/>}
-        <form onSubmit={handleSubmit} className="flex w-full h-full flex-grow ">
-          <div className=' w-[25%] h-full flex flex-col justify-evenly'>
+        <form onSubmit={handleSubmit} className="flex w-full h-full flex-grow justify-between ">
+          <div className=' w-[24%] h-full flex flex-col justify-evenly'>
             {/* Título */}
             <div className="space-y-2">
               <h2 className="text-lg font-semibold text-gray-800">Título</h2>
@@ -79,9 +80,9 @@ export const AddNotice = () => {
 
           </div>
           <div className=' w-[50%] h-full'>
-
+            <PreviewNotice/>
           </div>
-          <div className=' w-[25%] h-full flex flex-col justify-evenly'>
+          <div className=' w-[24%] h-full flex flex-col justify-evenly'>
               {/* Autor */}
             <div className="space-y-2">
               <h2 className="text-lg font-semibold text-gray-800">Autor</h2>
