@@ -45,7 +45,7 @@ const router = createBrowserRouter([
             {
                 path: "/edit-notice",
                 element: <EditNoticePage />
-            }
+            },
             {
                 path:"/dashboard-formulario",
                 element:<DashboardForm/>
