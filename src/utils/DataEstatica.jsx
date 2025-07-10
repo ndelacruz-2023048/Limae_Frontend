@@ -3,5 +3,5 @@ export const LinksSidebar = [
   { name: "mdi:book-outline",to:"/notices" },
   { name: "mdi:file-document-outline", to:"/detalle-reporte" },
   { name: "icon-park-outline:sales-report", to:"/dashboard-reportes" },
-
+  { name: "mdi:image-edit-outline", to: "/edit-notice" },
 ]
