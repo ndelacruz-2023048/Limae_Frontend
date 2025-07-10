@@ -2,9 +2,11 @@ import { NavLink } from 'react-router';
 import { Icon } from "@iconify/react"
 import { useLogin } from '../../hooks/useLogin';
 import { useForm } from 'react-hook-form';
+import { useState } from 'react';
 
 export default function LoginForm() {
     const { login } = useLogin()
+    const [showPassword, setShowPassword] = useState(false)
     const { register, handleSubmit, formState: {errors}, reset } = useForm(
         {
             mode: 'onChange'
@@ -36,15 +38,30 @@ export default function LoginForm() {
                     </div>
                     <div className="relative mb-4">
                         <Icon icon="si:lock-fill" className="absolute left-3 top-5 transform -translate-y-1/2 text-gray-500" />
-                        <input type="password" placeholder="Contraseña" className="bg-transparent p-2 pl-10 rounded-xl w-full mb-4" 
-                        style={{ boxShadow: `inset 6px 6px 12px #c5c5c5, inset -6px -6px 12px #fbfbfb` }} 
-                        {...register('password', {
-                            required: {
-                                value: true,
-                                message: 'La contraseña es obligatoria',
-                            }
-                        })}
+                        <input 
+                            type={showPassword ? 'text' : 'password'} 
+                            placeholder="Contraseña" 
+                            className="bg-transparent p-2 pl-10 rounded-xl w-full mb-4" 
+                            style={{ boxShadow: `inset 6px 6px 12px #c5c5c5, inset -6px -6px 12px #fbfbfb` }} 
+                            {...register('password', {
+                                required: {
+                                    value: true,
+                                    message: 'La contraseña es obligatoria',
+                                }
+                            })}
                         />
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute right-3 top-5 transform -translate-y-1/2 text-gray-500 focus:outline-none"
+                            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                        >
+                            {showPassword ? (
+                                <Icon icon="mdi:eye-off" width="20" height="20" />
+                            ) : (
+                                <Icon icon="mdi:eye" width="20" height="20" />
+                            )}
+                        </button>
                         {errors.password && <span className="text-red-500 text-sm">Este campo es obligatorio</span>}
                     </div>
                     <div className="flex items-center justify-between mb-8 ">

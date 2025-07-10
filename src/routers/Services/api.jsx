@@ -17,4 +17,15 @@ export const loginRequest = async (user) => {
             e
         }
     }
-};
+}
+
+export const registerRequest = async (user) => {
+    try {
+        return await apiClient.post('/Auth/register', user);
+    } catch (e) {
+        return {
+            error: true,
+            e
+        }
+    }
+}

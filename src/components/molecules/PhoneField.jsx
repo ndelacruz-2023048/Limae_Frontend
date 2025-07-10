@@ -64,11 +64,33 @@ export const PhoneField = () => {
                 onChange={(value, country) => handleCountryChange(value, country)}
                 inputProps={{
                 className:
-                    'w-full border border-gray-300 rounded-md p-2 pl-12 focus:ring-2 focus:ring-green-500 focus:border-green-500',
+                    'w-full bg-transparent rounded-md p-2 pl-12 focus:ring-2 focus:ring-green-500 focus:border-green-500',
                 }}
                 containerClass="w-full"
                 dropdownClass="z-50"
                 enableSearch
+                inputStyle={{ boxShadow: `inset 6px 6px 12px #c5c5c5, inset -6px -6px 12px #fbfbfb` }}
+                buttonStyle={{
+                    backgroundColor: 'transparent',
+                    border: 'none',
+                    boxShadow: `5px 5px 8px #c5c5c5, -5px -5px 8px #fbfbfb`,
+                    borderRadius: '9999px',
+                    // padding: '6px 12px',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.3s ease',
+                }}
+                dropdownStyle={{
+                    boxShadow: `5px 5px 8px #c5c5c5, -5px -5px 8px #fbfbfb`,
+                    borderRadius: '8px',
+                }}
+                containerStyle={{
+                    boxShadow: `5px 5px 8px #c5c5c5, -5px -5px 8px #fbfbfb`,
+                    borderRadius: '8px',
+                }}
+                searchStyle={{
+                    boxShadow: `5px 5px 8px #c5c5c5, -5px -5px 8px #fbfbfb`,
+                    borderRadius: '8px',
+                }}
             />
             )}
         />
