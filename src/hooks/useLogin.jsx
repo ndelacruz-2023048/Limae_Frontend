@@ -11,11 +11,12 @@ export const useLogin = () => {
     const [error, setError] = useState(false);
     const navigate = useNavigate();
 
-    const login = async (data) => {
+    const login = async (data, rememberMe) => {
         setIsLoading(true);
         const user = {
             login: data?.login,
-            password: data?.password
+            password: data?.password,
+            rememberMe: rememberMe || false
         };
         const response = await loginRequest(user);
         setIsLoading(false);

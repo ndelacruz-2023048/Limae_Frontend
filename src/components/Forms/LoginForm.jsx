@@ -7,6 +7,7 @@ import { useState } from 'react';
 export default function LoginForm() {
     const { login } = useLogin()
     const [showPassword, setShowPassword] = useState(false)
+    const [rememberMe, setRememberMe] = useState(false)
     const { register, handleSubmit, formState: {errors}, reset } = useForm(
         {
             mode: 'onChange'
@@ -14,7 +15,7 @@ export default function LoginForm() {
     )
 
     const onSubmit = async( data ) => {
-        await login(data);
+        await login(data, rememberMe);
         reset();
     }
 
@@ -66,7 +67,7 @@ export default function LoginForm() {
                     </div>
                     <div className="flex items-center justify-between mb-8 ">
                         <label className="inline-flex items-center">
-                            <input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600" />
+                            <input type="checkbox" className="form-checkbox h-4 w-4 text-blue-600" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
                             <span className="ml-2 text-gray-700">Recordarme</span>
                         </label>
                         <NavLink to="/forgot-password" className="text-blue-500 hover:underline">

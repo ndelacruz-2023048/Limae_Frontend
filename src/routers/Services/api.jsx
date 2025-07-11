@@ -29,3 +29,14 @@ export const registerRequest = async (user) => {
         }
     }
 }
+
+export const logoutRequest = async()=> {
+    try {
+        return await apiClient.post('/Auth/logout')
+    } catch (e) {
+        return {
+            error: true,
+            e
+        }
+    }
+}
