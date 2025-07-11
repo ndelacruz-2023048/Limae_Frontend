@@ -5,6 +5,7 @@ import { DashboardReportesPage } from '../page/DashboardReportesPage'
 import { LoginPage } from '../page/LoginPage'
 import { ProtectedRoutes } from '../hooks/ProtectedRoutes'
 import { RegisterPage } from '../page/RegisterPage'
+import { NotFound } from '../page/NotFund'
 
 const router = createBrowserRouter([
     {
@@ -36,7 +37,7 @@ const router = createBrowserRouter([
     },
     {
         path: '/*',
-        element: <div>404 not found</div>
+        element: <NotFound />
     }
 ])
 
