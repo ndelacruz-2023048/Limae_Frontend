@@ -5,6 +5,10 @@ export const useUploadImageStore = create((set,get)=>({
     setDataImageFile:(p)=>{
         set({dataImageFile:p})
     },
+    urlImageFile:null,
+    setUrlImageFile:(p)=>{
+        set({urlImageFile:p})
+    },
     isUploadingImage:false,
     setIsUploadingImage:(p)=>{
         set({isUploadingImage:p})

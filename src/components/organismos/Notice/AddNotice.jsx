@@ -7,7 +7,7 @@ import { PreviewNotice } from './PreviewNotice';
 
 export const AddNotice = () => {
   const navigate = useNavigate();
-  const {isUploadingImage} = useUploadImageStore()
+  const {isUploadingImage,urlImageFile} = useUploadImageStore()
   const {
     form,
     file,
@@ -41,7 +41,7 @@ export const AddNotice = () => {
             </div>
             {/* Entrada */}
             <div className="space-y-2">
-              <h2 className="text-lg font-semibold text-gray-800">Entrada</h2>
+              <h2 className="text-lg font-semibold text-gray-800">Sintesis</h2>
               <input
                 type="text"
                 name="entrada"
@@ -79,8 +79,8 @@ export const AddNotice = () => {
             </div>
 
           </div>
-          <div className=' w-[50%] h-full'>
-            <PreviewNotice/>
+          <div className=' w-[50%] h-[80%] flex m-auto'>
+            <PreviewNotice title={form.titulo} entrada={form.entrada} cuerpo={form.cuerpo} autor={form.autor} fecha={form.fecha}/>
           </div>
           <div className=' w-[24%] h-full flex flex-col justify-evenly'>
               {/* Autor */}
