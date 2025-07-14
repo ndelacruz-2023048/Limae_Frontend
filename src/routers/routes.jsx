@@ -9,14 +9,18 @@ import { DashboardAdminPage } from '../page/DashboardAdminPage'
 import { DashboardAlumnos } from '../components/organismos/Usuarios/DashboardAlumnos'
 import EditNoticePage from '../page/EditNoticePage'
 import { DashboardForm } from '../page/DashboardForms'
+import { LoginPage } from '../page/LoginPage'
+import { ProtectedRoutes } from '../hooks/ProtectedRoutes'
+import { RegisterPage } from '../page/RegisterPage'
+import { NotFound } from '../page/NotFund'
 
 const router = createBrowserRouter([
     {
         path:"/",
-        element:<Layout/>,
+        element:<ProtectedRoutes accesBy="authenticated"><Layout/></ProtectedRoutes>,
         children:[
             {
-                path:"/home",
+                index: true,
                 element:<h1>Home</h1>
             },
             {
@@ -55,7 +59,20 @@ const router = createBrowserRouter([
                 path:"/dashboard-formulario",
                 element:<DashboardForm/>
             }
-        ]
+        ],
+        errorElement:<h1>Error</h1>
+    },
+    {
+        path: '/login',
+        element: <ProtectedRoutes accesBy="non-authenticated"><LoginPage/></ProtectedRoutes>,
+    },
+    {
+        path: '/register',
+        element: <ProtectedRoutes accesBy="non-authenticated"><RegisterPage/></ProtectedRoutes>,
+    },
+    {
+        path: '/*',
+        element: <NotFound />
     }
 ])
 

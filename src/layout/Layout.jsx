@@ -1,12 +1,19 @@
 import React from 'react'
 import { Sidebar } from '../sidebar/sidebar'
 import { Outlet } from 'react-router'
+import { useLogout } from '../hooks/useLogout'
 
 export const Layout = ({children}) => {
+
+  const { logout } = useLogout()
+
+    const handleLogoutClick  = ()=> {
+        logout()
+    }
   return (
     <div className='flex flex-col h-screen bg-gradient-to-r from-[#e3ebfa] via-[#e4e9f9] to-[#e1def7]'>
       <div className='h-[7%]'>
-        f
+        <button className='bg-red-500 text-white p-2 rounded' onClick={handleLogoutClick}>Logout</button>
       </div>
       <div className='h-[93%] flex w-full'>
         <Sidebar />
