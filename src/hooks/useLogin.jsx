@@ -38,8 +38,6 @@ export const useLogin = () => {
 
         setError(false);
         const token = Cookies.get('token');
-        console.log('token', token);
-        console.log('response', response);
         
         setAuthUser(token);
         const userName = response.data.loggedUser.username;

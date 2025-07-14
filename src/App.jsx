@@ -1,12 +1,8 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
 import MyRouter from './routers/routes'
 import { AuthContextProvider } from './context/AuthContext'
-
+// import { Tooltip } from 'react-tooltip';
+  
 function App() {
-  //Funcion Socket
-
   return (
     <AuthContextProvider>
       <MyRouter/>

@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import Cookies from 'js-cookie'
+import { socketConnection } from '../socket/Socket';
+import {jwtDecode} from 'jwt-decode'
 
 const AuthContext = createContext();
 
@@ -7,16 +9,50 @@ export const AuthContextProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
+    const [isOnline, setIsOnline] = useState([]);
+
+    useEffect(() => {
+        socketConnection.connect();
+
+        socketConnection.on("connect", () => {
+        console.log("✅ Conectado al servidor con id:", socketConnection.id);
+        });
+
+        socketConnection.on("disconnect", () => {
+        console.log("❌ Desconectado del servidor");
+        });
+
+        return () => {
+        socketConnection.disconnect(); // solo si cierras la app
+        };
+    }, [])
+
 
     // Función para actualizar el usuario y el estado de autenticación
     const setAuthUser = (userData) => {
-        console.log('usuario: ', userData)
         if (userData) {
             setUser(userData);
-            setIsAuthenticated(true);
+            setIsAuthenticated(true)
+
+            try {
+            const decoded = jwtDecode(userData);
+            const userId = decoded?.uid;
+
+            if (userId && !socketConnection.connected) {
+                socketConnection.io.opts.query = {
+                    userId // ✅ Pasamos el userId en la conexión
+                };
+                socketConnection.auth = { token: userData }; // opcional
+                socketConnection.connect();
+            }
+        } catch (error) {
+            console.error("Error al decodificar token:", error);
+        }
+
         } else {
             setUser(null);
             setIsAuthenticated(false);
+            socketConnection.disconnect()
         }
         setLoading(false)
     };
@@ -30,8 +66,21 @@ export const AuthContextProvider = ({ children }) => {
             sameSite: 'none',
             path: '/'
         });
+        socketConnection.disconnect()
         setLoading(false);
     };
+
+    useEffect(() => {
+        const handleGetOnlineUsers = (users) => {
+            setIsOnline(users);
+        };
+
+        socketConnection.on("getOnlineUsers", handleGetOnlineUsers);
+
+        return () => {
+            socketConnection.off("getOnlineUsers", handleGetOnlineUsers);
+        };
+    }, [])
 
     // Cargar sesión desde cookies al iniciar
     useEffect(() => {
@@ -45,7 +94,7 @@ export const AuthContextProvider = ({ children }) => {
         } else {
             setLoading(false);
         }
-    }, []);
+    }, [])
 
     // Función para actualizar el contexto de autenticación
     const refreshAuthContext = async () => {
@@ -70,7 +119,9 @@ export const AuthContextProvider = ({ children }) => {
             loading,
             setAuthUser, 
             clearAuthUser,
-            refreshAuthContext // 👈 Agregamos esta función
+            refreshAuthContext,
+            isOnline,
+            socket: socketConnection
         }}>
             {children}
         </AuthContext.Provider>
