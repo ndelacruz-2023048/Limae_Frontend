@@ -22,69 +22,51 @@ const processQueue = (error, token = null) => {
     failedQueue = [];
 }
 
-apiClient.interceptors.request.use(config => {
-    const token = localStorage.getItem('accessToken'); // Asume que guardas el token aquí
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+apiClient.interceptors.request.use(
+    config => {
+        return config;
+    },
+    error => {
+        return Promise.reject(error);
     }
-    return config;
-}, error => {
-    return Promise.reject(error);
-});
+);
 
 apiClient.interceptors.response.use(
     response => response,
     async error => {
         const originalRequest = error.config;
 
-        // Verifica si el error es 401 y no es una solicitud de refresh
-        if (error.response?.status === 401 && !originalRequest._retry && 
-            originalRequest.url !== '/Auth/refresh') {
-            
-            if (isRefreshing) {
-                return new Promise((resolve, reject) => {
-                    failedQueue.push({ resolve, reject });
-                }).then(token => {
-                    originalRequest.headers['Authorization'] = `Bearer ${token}`;
-                    return apiClient(originalRequest);
-                }).catch(err => {
-                    return Promise.reject(err);
-                });
-            }
+        // Solo intentamos refrescar si es un error 401 y no es la ruta de refresh
+        if (
+        error.response?.status === 401 &&
+        !originalRequest._retry &&
+        originalRequest.url !== '/Auth/refresh'
+        ) {
+        if (isRefreshing) {
+            return new Promise((resolve, reject) => {
+            failedQueue.push({ resolve, reject });
+            }).then(token => {
+            return apiClient(originalRequest);
+            }).catch(err => {
+            return Promise.reject(err);
+            });
+        }
 
-            originalRequest._retry = true;
-            isRefreshing = true;
+        originalRequest._retry = true;
+        isRefreshing = true;
 
-            try {
-                const response = await apiClient.post('/Auth/refresh');
-                const newToken = response.data.token;
-                
-                // Almacena el nuevo token
-                localStorage.setItem('accessToken', newToken);
-                
-                // Actualiza los headers
-                apiClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
-                originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
-                
-                // Procesa la cola de solicitudes fallidas
-                processQueue(null, newToken);
-                
-                // Reintenta la solicitud original
-                return apiClient(originalRequest);
-            } catch (refreshError) {
-                processQueue(refreshError, null);
-                
-                // Si el refresh falla, redirige a login
-                if (refreshError.response && 
-                    (refreshError.response.status === 401 || refreshError.response.status === 403)) {
-                    localStorage.removeItem('accessToken');
-                    window.location.href = '/login';
-                }
-                
-                return Promise.reject(refreshError);
-            } finally {
-                isRefreshing = false;
-            }
+        try {
+            await apiClient.post('/Auth/refresh'); // refreshToken va en cookie, no en headers
+
+            // Una vez renovado, reintentamos la solicitud original
+            return apiClient(originalRequest); // El nuevo token viene en cookie
+        } catch (refreshError) {
+            processQueue(refreshError, null);
+            window.location.href = '/login';
+            return Promise.reject(refreshError);
+        } finally {
+            isRefreshing = false;
+        }
         }
 
         return Promise.reject(error);
