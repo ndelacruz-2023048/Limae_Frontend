@@ -17,8 +17,8 @@ export const ComponetsDashboardAdmin = () => {
   const ultimosEstudiantes = estudiantes.slice(0, 5);
 
   const groupedByCountry = estudiantes.reduce((acc, estudiante) => {
-    const country = estudiante.country || 'Desconocido';
-    acc[country] = (acc[country] || 0) + 1;
+    const academicCode = estudiante.academicCode || 'Desconocido';
+    acc[academicCode] = (acc[academicCode] || 0) + 1;
     return acc;
   }, {});
 
@@ -61,7 +61,7 @@ export const ComponetsDashboardAdmin = () => {
 
         {/* Gráfico de Estudiantes */}
         <div className="bg-gradient-to-br from-white/80 via-purple-100/80 to-white/80 backdrop-blur-md rounded-2xl p-6 shadow">
-          <h3 className="text-lg font-bold mb-4">Gráfica: estudiantes por país</h3>
+          <h3 className="text-lg font-bold mb-4">Gráfica: estudiantes código académico</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
