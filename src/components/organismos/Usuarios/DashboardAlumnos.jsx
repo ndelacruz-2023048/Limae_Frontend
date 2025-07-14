@@ -1,5 +1,5 @@
 // DashboardAlumnos.jsx
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink } from 'react-router'
 import './dashboardAlumnos.css'
 import { obtenerReportesRequest, reportePorIdRequest } from '../../../services/api'
@@ -42,15 +42,15 @@ export const DashboardAlumnos = () => {
           <Carousel />
         </NavLink>
       </div>
-      <div className="dashboard-alumnos-container flex flex-col md:flex-row gap-2 md:gap-0 w-full">
-        <aside className="sidebar-reportes w-full md:w-1/4 lg:w-1/5 px-1 md:px-0 mb-4 md:mb-0">
+      <div className="dashboard-alumnos-container flex flex-col md:flex-row gap-2 md:gap-0 w-full min-h-screen">
+        <aside className="sidebar-reportes w-full md:w-1/4 lg:w-1/5 px-1 md:px-0 mb-4 md:mb-0 flex flex-col h-full min-h-screen">
           <h2 className="sidebar-title text-xl sm:text-2xl mb-2 text-center">Reportes</h2>
-          <ul className="lista-reportes flex flex-row md:flex-col gap-2 md:gap-3 overflow-x-auto md:overflow-visible">
+          <ul className="lista-reportes flex flex-row md:flex-col gap-2 md:gap-3 overflow-x-auto md:overflow-visible flex-1">
             {reportes.map((reporte) => (
               <li
                 key={reporte._id}
-                className={`reporte-item min-w-[120px] md:min-w-0 text-gray-700 font-semibold text-base sm:text-lg text-center cursor-pointer hover:bg-yellow-100 transition flex items-center justify-center gap-2 sm:gap-3 px-2 py-2 rounded-md
-                  ${reporteSeleccionado && reporteSeleccionado._id === reporte._id ? 'bg-gray-50' : ''}`}
+                className={`reporte-item min-w-[120px] md:min-w-0 text-gray-700 font-semibold text-base sm:text-lg text-center cursor-pointer hover:bg-yellow-100 transition flex items-center justify-center gap-2 sm:gap-3 px-2 py-2 rounded-md w-full`
+                  + (reporteSeleccionado && reporteSeleccionado._id === reporte._id ? ' bg-gray-50' : '')}
                 onClick={() => handleClickReport(reporte._id)}
               >
                 <span className="inline-block w-3 h-3 rounded-full bg-green-500 mr-1 sm:mr-2"></span>
@@ -58,6 +58,13 @@ export const DashboardAlumnos = () => {
               </li>
             ))}
           </ul>
+          {/* Espacio para racha */}
+          <div className="mt-6 md:mt-8 px-2 py-4 bg-yellow-50 rounded-lg shadow flex flex-col items-center justify-center">
+            <span className="text-3xl md:text-4xl font-bold text-yellow-500 mb-1">🔥</span>
+            <span className="text-lg md:text-xl font-semibold text-yellow-700">Racha</span>
+            <span className="text-sm text-yellow-600">¡Sigue reportando para aumentar tu racha!</span>
+            <span className="mt-2 text-2xl font-bold text-yellow-700">0 días</span>
+          </div>
         </aside>
         <main className="contenido-reporte flex-1 w-full min-h-[300px]">
           {reporteSeleccionado ? (
