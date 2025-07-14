@@ -29,17 +29,15 @@ export const ComponetsDashboardAdmin = () => {
   }));
 
   return (
-    <div className="bg-[#f3f3ff] min-h-screen p-6 space-y-6 text-gray-800">
+    <div className="bg-[#f3f3ff] min-h-screen p-4 md:p-6 space-y-6 text-gray-800">
       {/* Encabezado */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Última Noticia */}
         <div className="lg:col-span-2 space-y-3">
-          <div className="px-2">
-            <h2 className="text-2xl font-bold text-gray-700">Ultima noticia: </h2>
-          </div>
+          <h2 className="text-xl md:text-2xl font-bold text-gray-700">Última noticia</h2>
           {ultimaNoticia && (
             <div
-              className="relative mx-auto overflow-hidden rounded-2xl shadow h-[300px] w-full cursor-pointer"
+              className="relative w-full overflow-hidden rounded-2xl shadow aspect-video cursor-pointer"
               onClick={() => navigate('/details-notice', { state: { post: ultimaNoticia } })}
             >
               <img
@@ -47,13 +45,11 @@ export const ComponetsDashboardAdmin = () => {
                 alt="noticia fondo"
                 className="absolute inset-0 w-full h-full object-cover"
               />
-              <div className="relative bg-gradient-to-r from-white/80 via-white/60 to-white/80 backdrop-blur-md p-6 m-4 rounded-xl shadow-md">
-                <h3 className="text-lg font-semibold text-gray-900">
+              <div className="relative bg-gradient-to-r from-white/80 via-white/60 to-white/80 backdrop-blur-md p-4 md:p-6 m-4 rounded-xl shadow-md">
+                <h3 className="text-base md:text-lg font-semibold text-gray-900">
                   {ultimaNoticia.titulo}
                 </h3>
-                <p className="text-sm text-gray-700 mt-1">
-                  {ultimaNoticia.entrada || ''}
-                </p>
+                <p className="text-sm text-gray-700 mt-1">{ultimaNoticia.entrada || ''}</p>
               </div>
             </div>
           )}
@@ -61,7 +57,7 @@ export const ComponetsDashboardAdmin = () => {
 
         {/* Gráfico de Estudiantes */}
         <div className="bg-gradient-to-br from-white/80 via-purple-100/80 to-white/80 backdrop-blur-md rounded-2xl p-6 shadow">
-          <h3 className="text-lg font-bold mb-4">Gráfica: estudiantes código académico</h3>
+          <h3 className="text-lg font-bold mb-4">Gráfica: código académico</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -91,8 +87,8 @@ export const ComponetsDashboardAdmin = () => {
       </div>
 
       {/* Fila inferior */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Reporte de estudiantes */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 gap-y-6">
+        {/* Reportes */}
         <div
           className="bg-gradient-to-br from-white/80 via-yellow-100/60 to-white/80 backdrop-blur-md rounded-2xl p-6 shadow cursor-pointer"
           onClick={() => navigate('/dashboard-reportes')}
@@ -111,7 +107,7 @@ export const ComponetsDashboardAdmin = () => {
                 <span className="w-12 h-12 flex items-center justify-center bg-yellow-100 rounded-full text-yellow-600 font-bold border-2 border-gray-200">
                   {r.numeroReporte?.slice(-2)}
                 </span>
-                <span className="font-medium text-gray-700">{r.numeroReporte}</span>
+                <span className="font-medium text-gray-700 text-sm">{r.numeroReporte}</span>
               </li>
             ))}
           </ul>
@@ -149,14 +145,17 @@ export const ComponetsDashboardAdmin = () => {
           <h3 className="text-lg font-bold mb-4">Estudiantes</h3>
           <ul className="space-y-3">
             {ultimosEstudiantes.map(e => (
-              <li key={e._id} className="flex items-center gap-4 p-3 rounded-xl bg-white/30 hover:bg-white/50 transition shadow">
+              <li
+                key={e._id}
+                className="flex items-center gap-4 p-3 rounded-xl bg-white/30 hover:bg-white/50 transition shadow"
+              >
                 <img
                   src={e.profilePicture || 'https://via.placeholder.com/40'}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                   alt={e.name}
+                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
                 />
-                <div>
-                  <p className="font-semibold text-gray-800">{e.name} {e.surname}</p>
+                <div className="min-w-0">
+                  <p className="font-semibold text-gray-800 text-sm truncate">{e.name} {e.surname}</p>
                 </div>
               </li>
             ))}
