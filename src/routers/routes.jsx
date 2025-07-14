@@ -6,6 +6,9 @@ import { NoticeMainPage } from '../page/NoticeMainPage'
 import { AddNoticePage } from '../page/AddNoticePage'
 import { DetailsNoticePage } from '../page/DetailsNoticePage'
 import { DashboardAdminPage } from '../page/DashboardAdminPage'
+import { DashboardAlumnos } from '../components/organismos/Usuarios/DashboardAlumnos'
+import EditNoticePage from '../page/EditNoticePage'
+import { DashboardForm } from '../page/DashboardForms'
 
 const router = createBrowserRouter([
     {
@@ -39,6 +42,18 @@ const router = createBrowserRouter([
             {
                 path:"/dashboard-admin",
                 element:<DashboardAdminPage/>
+            },
+            {
+                path:"/dashboard-usuario",
+                element: <DashboardAlumnos />
+            },
+            {
+                path: "/edit-notice",
+                element: <EditNoticePage />
+            },
+            {
+                path:"/dashboard-formulario",
+                element:<DashboardForm/>
             }
         ]
     }

@@ -1,152 +1,185 @@
-import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useNotice } from '../../../../hooks/useNotice';
+import { UploadImage } from '../../moleculas/UploadImage/UploadImage';
+import { Loading } from '../../moleculas/Loading';
+import { useUploadImageStore } from '../../../stores/UploadImageStore';
+import { PreviewNotice } from './PreviewNotice';
 
 export const AddNotice = () => {
-  const [form, setForm] = useState({
-    lastName: '',
-    postText: '',
-    skills: [],
-    file: null,
-  });
-  const [skillInput, setSkillInput] = useState('');
-  const fileInputRef = useRef(null);
-
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  const handleFileChange = (e) => {
-    setForm({ ...form, file: e.target.files[0] });
-  };
-
-  const handleAddSkill = () => {
-    if (skillInput.trim() && !form.skills.includes(skillInput.trim())) {
-      setForm({ ...form, skills: [...form.skills, skillInput.trim()] });
-      setSkillInput('');
-    }
-  };
-
-  const handleRemoveSkill = (skill) => {
-    setForm({ ...form, skills: form.skills.filter((s) => s !== skill) });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Form submitted:', form);
-    alert('Post added successfully!');
-  };
+  const navigate = useNavigate();
+  const {isUploadingImage,urlImageFile} = useUploadImageStore()
+  const {
+    form,
+    file,
+    etiquetaInput,
+    fileInputRef,
+    handleChange,
+    handleFileChange,
+    handleAddEtiqueta,
+    handleRemoveEtiqueta,
+    handleSubmit,
+    setEtiquetaInput,
+  } = useNotice(navigate);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-1 bg-blue-500"></div> {/* Barra decorativa azul */}
-        
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Personal Detail */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-800">Personal Detail</h2>
-            <div className="border-b border-gray-200 pb-4">
+    <div className=" bg-gray-50 flex items-center justify-center p-4 overflow-y-auto h-full w-full">
+      {isUploadingImage && <Loading/>}
+        <form onSubmit={handleSubmit} className="flex w-full h-full flex-grow justify-between ">
+          <div className=' w-[24%] h-full flex flex-col justify-evenly'>
+            {/* Título */}
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold text-gray-800">Título</h2>
               <input
                 type="text"
-                name="lastName"
-                placeholder="Last Name"
-                value={form.lastName}
+                name="titulo"
+                placeholder="Título"
+                value={form.titulo}
                 onChange={handleChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
-          </div>
-
-          {/* Edit Text */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-800">Edit Text</h2>
-            <div className="border-b border-gray-200 pb-4">
+            {/* Entrada */}
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold text-gray-800">Sintesis</h2>
+              <input
+                type="text"
+                name="entrada"
+                placeholder="Resumen breve..."
+                value={form.entrada}
+                onChange={handleChange}
+                required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            {/* Cuerpo */}
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold text-gray-800">Cuerpo</h2>
               <textarea
-                name="postText"
-                placeholder="Describe your post..."
-                value={form.postText}
+                name="cuerpo"
+                placeholder="Contenido completo de la noticia..."
+                value={form.cuerpo}
                 onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                rows={6}
                 required
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               />
             </div>
-          </div>
+            {/* URL */}
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold text-gray-800">URL</h2>
+              <input
+                type="url"
+                name="url"
+                placeholder="https://..."
+                value={form.url}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
 
-          {/* Skills */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-800">Skills</h2>
-            <div className="border-b border-gray-200 pb-4">
-              <div className="flex flex-wrap gap-2 mb-3">
-                {form.skills.map((skill, idx) => (
-                  <span 
-                    key={idx} 
-                    className="inline-flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
-                  >
-                    {skill}
-                    <button 
-                      type="button" 
-                      onClick={() => handleRemoveSkill(skill)}
-                      className="ml-1 text-blue-500 hover:text-red-500"
+          </div>
+          <div className=' w-[50%] h-[80%] flex m-auto'>
+            <PreviewNotice title={form.titulo} entrada={form.entrada} cuerpo={form.cuerpo} autor={form.autor} fecha={form.fecha}/>
+          </div>
+          <div className=' w-[24%] h-full flex flex-col justify-evenly'>
+              {/* Autor */}
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold text-gray-800">Autor</h2>
+              <input
+                type="text"
+                name="autor"
+                placeholder="Nombre del autor"
+                value={form.autor}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            {/* Fecha */}
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold text-gray-800">Fecha</h2>
+              <input
+                type="date"
+                name="fecha"
+                value={form.fecha}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+              {/* Etiquetas */}
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold text-gray-800">Etiquetas</h2>
+              <div className="border-b border-gray-200 pb-4">
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {form.etiquetas.map((et, idx) => (
+                    <span
+                      key={idx}
+                      className="inline-flex items-center bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
                     >
-                      &times;
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={skillInput}
-                  onChange={(e) => setSkillInput(e.target.value)}
-                  placeholder="Add Skill"
-                  className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddSkill}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-                >
-                  Add
-                </button>
+                      {et}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEtiqueta(et)}
+                        className="ml-1 text-blue-500 hover:text-red-500"
+                      >
+                        &times;
+                      </button>
+                    </span>
+                  ))}
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={etiquetaInput}
+                    onChange={(e) => setEtiquetaInput(e.target.value)}
+                    placeholder="Agregar etiqueta"
+                    className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddEtiqueta}
+                    className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+                  >
+                    Agregar
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* File Upload */}
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold text-gray-800">File Upload</h2>
-            <div 
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:border-blue-400 transition-colors"
-              onClick={() => fileInputRef.current.click()}
+            {/* Fotografía */}
+            <div className="space-y-2">
+              <h2 className="text-lg font-semibold text-gray-800">Fotografía</h2>
+              <div
+                className="flex h-[100px] border-2 border-dashed border-gray-300 rounded-lg  text-center cursor-pointer hover:border-blue-400 transition-colors"
+              >
+                <UploadImage handleChange={handleFileChange}/>
+              </div>
+            </div>
+            {/* Botón */}
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition"
             >
-              <input 
-                type="file" 
-                ref={fileInputRef}
-                className="hidden" 
-                onChange={handleFileChange} 
-              />
-              {form.file ? (
-                <p className="text-blue-500 font-medium">{form.file.name}</p>
-              ) : (
-                <>
-                  <p className="text-gray-600 mb-1">Click to upload or drag and drop</p>
-                  <p className="text-sm text-gray-500">PNG, JPG, PDF (max. 5MB)</p>
-                </>
-              )}
-            </div>
+              Agregar Noticia
+            </button>
           </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition"
-          >
-            Add Post
-          </button>
+
+
+          
+
+          
+
+          
+
+          
+          
+
+
+          
+
+
         </form>
-      </div>
+
     </div>
   );
 };
