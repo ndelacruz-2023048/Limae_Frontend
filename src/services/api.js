@@ -31,3 +31,32 @@ export const obtenerReportesRequest = async()=>{
         }
     }
 }
+
+export const crearReporteRequest = async (datos) => {
+    try {
+        const res = await apiReport.post('/agregar', datos);
+        return res.data;
+    } catch (error) {
+        return {
+            error: true,
+            error
+        };
+    }
+};
+
+const apiUsuario = axios.create({
+    baseURL: `${API_URL}/api/v1/usuarios`,
+    timeout: 2000,
+});
+  
+  export const obtenerUsuariosRequest = async () => {
+    try {
+        const res = await apiUsuario.get('/');
+        return res.data;
+    } catch (error) {
+        return {
+            error: true,
+            error
+        };
+    }
+};
