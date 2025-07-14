@@ -8,6 +8,7 @@ import { DetailsNoticePage } from '../page/DetailsNoticePage'
 import { DashboardAlumnos } from '../components/organismos/Usuarios/DashboardAlumnos'
 import EditNoticePage from '../page/EditNoticePage'
 import { DashboardForm } from '../page/DashboardForms'
+import NoticeListpage from '../page/NoticeListPage'
 
 const router = createBrowserRouter([
     {
@@ -43,12 +44,16 @@ const router = createBrowserRouter([
                 element: <DashboardAlumnos />
             },
             {
-                path: "/edit-notice",
+                path: "/edit-notice/:id",
                 element: <EditNoticePage />
             },
             {
                 path:"/dashboard-formulario",
                 element:<DashboardForm/>
+            },
+            {
+                path: "/notice-list",
+                element: <NoticeListpage />
             }
         ]
     }
