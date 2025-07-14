@@ -13,6 +13,7 @@ import { LoginPage } from '../page/LoginPage'
 import { ProtectedRoutes } from '../hooks/ProtectedRoutes'
 import { RegisterPage } from '../page/RegisterPage'
 import { NotFound } from '../page/NotFund'
+import NoticeListpage from '../page/NoticeListPage'
 
 const router = createBrowserRouter([
     {
@@ -52,12 +53,16 @@ const router = createBrowserRouter([
                 element: <DashboardAlumnos />
             },
             {
-                path: "/edit-notice",
+                path: "/edit-notice/:id",
                 element: <EditNoticePage />
             },
             {
                 path:"/dashboard-formulario",
                 element:<DashboardForm/>
+            },
+            {
+                path: "/notice-list",
+                element: <NoticeListpage />
             }
         ],
         errorElement:<h1>Error</h1>
