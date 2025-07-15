@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getUserConnected } from "../routers/Services/api";
+import { getUserConnected } from "../routers/Services/Api";
 import { toast } from "sonner";
 import { UserAuth } from "../context/AuthContext";
 
