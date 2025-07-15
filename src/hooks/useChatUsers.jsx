@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getUserConnected } from "../routers/Services/Api";
 import { toast } from "sonner";
 import { UserAuth } from "../context/AuthContext";
+import { getUserConnected } from "../routers/Services/Api";
 
 export const useChatUsers = () => {
     const [users, setUsers] = useState([]);
