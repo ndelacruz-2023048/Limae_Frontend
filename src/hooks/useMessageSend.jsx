@@ -6,18 +6,18 @@ export const useMessage = () => {
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState(null)
 
-    const sendMessage = async (id, data, socket) => {
+    const sendMessage = async (id, data) => {
         setLoading(true)
         setError(null)
 
         const message = {
             content: data?.content || '',
         }
-        
 
         try {
             const response = await sendMessageRequest(id, message)
             setLoading(false)
+            
             if(response.error) {
                 const backendErrors = response.e?.response?.data?.errors;
                 const backendMessage = response.e?.response?.data?.msg;
@@ -33,9 +33,13 @@ export const useMessage = () => {
                 return false
             }
 
-            if(socket) {
-                socket.emit('newMessage', message)
-            }
+            // ELIMINAR ESTA LÍNEA - ya no necesitamos emitir desde el frontend
+            // if(socket) {
+            //     socket.emit('newMessage', message)
+            // }
+            
+            // El mensaje se manejará automáticamente por el evento 'messageConfirmed' del socket
+            console.log('Mensaje enviado al servidor:', response.data);
             return true
         } catch (error) {
             setLoading(false);
@@ -51,5 +55,4 @@ export const useMessage = () => {
         error,
         sendMessage,
     }
-
 }

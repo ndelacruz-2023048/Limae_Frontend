@@ -7,7 +7,7 @@ export const ChatHeader = ({ setUser }) => {
     const { isOnline } = UserAuth()
 
     return (
-        <div className=' p-4 bg-transparent rounded-lg shadow-sm w-full h-full flex items-center text-white'>
+        <div className=' p-4 bg-transparent rounded-lg w-full h-full flex items-center text-white'>
             {setUser.profilePicture ? (
                 <picture>
                     <source srcSet={setUser.profilePicture} type="image/webp" />

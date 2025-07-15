@@ -9,7 +9,7 @@ import { GenerateInitialsAvatar } from "../../utils/Avatar";
 import { formatDate } from "../../utils/formatDate";
 
 
-export const ChatContainer = ({selectedUser}) => {
+export const ChatContainer = ({selectedUser, onClose}) => {
     const { messages, loading, error } = useMessages(selectedUser._id);
     const { user } = UserAuth()
     const messageEndRef = useRef(null)
@@ -35,15 +35,18 @@ export const ChatContainer = ({selectedUser}) => {
     }, [messages])
     
     return (
-        <div className="flex-1 p-4 bg-gray-100 rounded-lg shadow-md h-full">
+        <div className="flex-1 p-4 h-full rounded-2xl shadow-lg border border-white/30">
             <div className="flex justify-between gap-4 items-center">
                 <ChatHeader setUser={selectedUser}/>
-                <span >
-                    close
-                </span>
+                <button 
+                    onClick={onClose} // ✅ Llamar función para cerrar
+                    className="text-gray-500 hover:text-gray-700 p-2"
+                >
+                    ✕ {/* O usa un ícono de close */}
+                </button>
             </div>
 
-            <div className="h-[350px] w-[500px] flex-1 overflow-y-auto p-4 space-y-4 ">
+            <div className="h-[340px] w-[500px] flex-1 overflow-y-auto p-4 space-y-4 ">
                 {loading ? (
                     <FadeLoader />
                 ) : messages.length === 0 ? (
@@ -86,8 +89,8 @@ export const ChatContainer = ({selectedUser}) => {
                                 <div
                                     className={`max-w-xs md:max-w-md lg:max-w-lg px-4 py-2 rounded-lg ${
                                         isMe
-                                            ? 'bg-blue-500 text-white rounded-br-none'
-                                            : 'bg-white text-gray-800 rounded-bl-none shadow-md'
+                                            ? 'bg-gradient-to-br from-blue-500/80 to-purple-500/80 text-white border-white/20 rounded-br-md'
+                                            : 'bg-white/60 text-gray-800 border-white/30 rounded-bl-md shadow-sm'
                                     }`}
                                 >
                                     {!isMe && (

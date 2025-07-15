@@ -27,7 +27,6 @@ export const AuthContextProvider = ({ children }) => {
         };
     }, [])
 
-
     // Función para actualizar el usuario y el estado de autenticación
     const setAuthUser = (userData) => {
         if (userData) {
@@ -96,7 +95,7 @@ export const AuthContextProvider = ({ children }) => {
         }
     }, [])
 
-    // Función para actualizar el contexto de autenticación
+    // NUEVA FUNCIÓN: Función para actualizar el contexto de autenticación
     const refreshAuthContext = async () => {
         const token = Cookies.get('token', {
             domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
@@ -106,11 +105,48 @@ export const AuthContextProvider = ({ children }) => {
         if (token) {
             setUser(token);
             setIsAuthenticated(true);
+            
+            // IMPORTANTE: También actualizar el socket con el nuevo token
+            try {
+                const decoded = jwtDecode(token);
+                const userId = decoded?.uid;
+                
+                if (userId && socketConnection.connected) {
+                    socketConnection.auth = { token }; // Actualizar el token en el socket
+                }
+            } catch (error) {
+                console.error("Error al decodificar token actualizado:", error);
+            }
         } else {
             setUser(null);
             setIsAuthenticated(false);
         }
     };
+
+    // NUEVO: Listener para cambios en las cookies
+    useEffect(() => {
+        const checkTokenChanges = () => {
+            const currentToken = Cookies.get('token', {
+                domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
+                secure: true,
+                sameSite: 'none'
+            });
+            
+            // Solo actualizar si el token cambió
+            if (currentToken !== user) {
+                if (currentToken) {
+                    setAuthUser(currentToken);
+                } else {
+                    clearAuthUser();
+                }
+            }
+        };
+
+        // Verificar cambios cada segundo (puedes ajustar el intervalo)
+        const interval = setInterval(checkTokenChanges, 1000);
+
+        return () => clearInterval(interval);
+    }, [user]); // Depende de user para detectar cambios
 
     return (
         <AuthContext.Provider value={{ 

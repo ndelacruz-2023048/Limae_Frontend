@@ -11,6 +11,14 @@ const apiClient = axios.create(
 let isRefreshing = false;
 let failedQueue = [];
 
+// Variable para almacenar la función de actualización del contexto
+let refreshAuthContextCallback = null;
+
+// Función para establecer el callback del contexto
+export const setAuthContextCallback = (callback) => {
+    refreshAuthContextCallback = callback;
+};
+
 const processQueue = (error, token = null) => {
     failedQueue.forEach(prom => {
         if (error) {
@@ -58,6 +66,12 @@ apiClient.interceptors.response.use(
         try {
             await apiClient.post('/Auth/refresh'); // refreshToken va en cookie, no en headers
 
+            // IMPORTANTE: Después de renovar el token, actualizar el contexto
+            if (refreshAuthContextCallback) {
+                await refreshAuthContextCallback();
+            }
+
+            processQueue(null, true);
             // Una vez renovado, reintentamos la solicitud original
             return apiClient(originalRequest); // El nuevo token viene en cookie
         } catch (refreshError) {
