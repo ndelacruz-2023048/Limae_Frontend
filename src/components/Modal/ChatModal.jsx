@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { SidebarChat } from '../../sidebar/sidebarChat';
+import { SidebarChat } from '../../sidebar/SidebarChat';
 import { ChatContainer } from '../organismos/ChatContainer';
 
 export const ChatModal = ({ isOpen, onClose }) => {
