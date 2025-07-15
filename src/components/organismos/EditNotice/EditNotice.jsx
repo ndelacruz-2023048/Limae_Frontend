@@ -79,8 +79,6 @@ const EditNotice = () => {
       });
 
       const result = await response.json();
-      console.log("Respuesta cruda del backend:", result);
-
       if (!response.ok || !result.success) {
         alert("❌ Error al actualizar la noticia");
         console.error(result.message || result.error);
@@ -132,13 +130,13 @@ const EditNotice = () => {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid md:grid-cols-3 gap-6 bg-white rounded-xl shadow-lg p-6"
+        className="flex flex-col md:flex-row gap-6 bg-white rounded-xl shadow-lg p-4 sm:p-6"
       >
-        {/* Columna Izquierda */}
-        <div className="col-span-1">
+        {/* Columna izquierda */}
+        <div className="w-full md:w-1/3">
           <h2 className="text-xl font-semibold mb-4">Fotografía</h2>
 
-          <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
+          <div className="relative w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
             {previewImages.length > 0 ? (
               <>
                 <img
@@ -218,7 +216,7 @@ const EditNotice = () => {
         </div>
 
         {/* Columna derecha */}
-        <div className="col-span-2 space-y-4">
+        <div className="w-full md:w-2/3 space-y-4">
           <h2 className="text-xl font-semibold">Editar Noticia</h2>
 
           <input
@@ -275,7 +273,7 @@ const EditNotice = () => {
                   </span>
                 ))}
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   value={etiquetaInput}
@@ -294,7 +292,7 @@ const EditNotice = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-4 flex-wrap">
             <button
               type="button"
               onClick={() => navigate('/notice-list')}
