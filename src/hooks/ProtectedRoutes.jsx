@@ -4,7 +4,6 @@ import { UserAuth } from "../context/AuthContext";
 export const ProtectedRoutes = ({ children, accesBy }) => {
     const { user, isAuthenticated, loading } = UserAuth();
 
-    console.log('ProtectedRoutes - Estado actual:', { user, isAuthenticated, loading });
 
     if (loading) {
         return <div>Cargando...</div>; // Muestra un indicador de carga
