@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { UploadImage } from "../../moleculas/UploadImage/UploadImage";
-import { obtenerUsuariosRequest, crearReporteRequest } from "../../../services/api";
+import { useUploadImage } from "../../../utils/useUploadImage"
+import { useUploadImageStore } from "../../../stores/UploadImageStore";
+import { obtenerAdminRequest, crearReporteRequest } from "../../../services/api";
 
 export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
   const [usuarios, setUsuarios] = useState([]);
@@ -10,15 +12,18 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
     usuarioQueRealizaraElSeguimiento: "",
   });
 
+  const { urlImageFile, isUploadingImage } = useUploadImageStore();
+  const { dataImage, isLoadingImage, registerImage } = useUploadImage();
+  const [fileImage, setFileImage] = useState(null);
+
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const data = await obtenerUsuariosRequest();
-        console.log("Respuesta de usuarios:", data);
-        if (!data.error && Array.isArray(data.usuarios)) {
-          setUsuarios(data.usuarios);
+        const data = await obtenerAdminRequest();
+        if (!data.error && Array.isArray(data.admins)) {
+          setUsuarios(data.admins);
         } else {
-          console.error("La respuesta no contiene un array de usuarios:", data);
+          console.error("La respuesta no contiene un array válido de usuarios:", data);
         }
       } catch (error) {
         console.error("Error al obtener usuarios:", error);
@@ -31,19 +36,47 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleImageUpload = (file) => {
+    setFileImage(file);
+  };
+
   const handleSubmit = async () => {
-    const datos = {
-      ...form,
-      usuarioQueHizoElReporte: usuarioActualId,
-    };
-
-    const res = await crearReporteRequest(datos);
-
-    if (!res.error) {
-      console.log("Reporte creado:", res);
-      onClose();
-    } else {
-      alert("Error al crear el reporte: " + res.message);
+    const { descripcion, tipoDeReporte, usuarioQueRealizaraElSeguimiento } = form;
+  
+    if (!descripcion || !tipoDeReporte || !usuarioQueRealizaraElSeguimiento) {
+      alert("Por favor, completa todos los campos antes de continuar.");
+      return;
+    }
+  
+    try {
+      let imageUrl = "";
+      if (fileImage) {
+        const uploadResult = await registerImage(fileImage);
+        imageUrl = uploadResult?.responseImage?.secure_url || "";
+      }
+  
+      const datos = {
+        ...form,
+        image: imageUrl,
+        usuarioQueHizoElReporte: usuarioActualId,
+      };
+  
+      const res = await crearReporteRequest(datos);
+      if (!res.error) {
+        console.log("Reporte creado:", res);
+        onClose();
+        setForm({
+          descripcion: "",
+          tipoDeReporte: "",
+          usuarioQueRealizaraElSeguimiento: "",
+        });
+        setFileImage(null);
+      } else {
+        alert("Error al crear el reporte: " + res.message);
+      }
+    } catch (err) {
+      console.error("Error al crear el reporte:", err);
+      alert("Error inesperado al crear el reporte.");
     }
   };
 
@@ -73,7 +106,7 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
           />
 
           <div className="mt-4 h-[40%] border border-dashed border-gray-400 rounded-lg overflow-hidden">
-            <UploadImage />
+            <UploadImage handleChange={handleImageUpload} />
           </div>
         </div>
 
@@ -81,7 +114,7 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
         <div className="w-full lg:w-[50%] h-full bg-white p-4 flex flex-col justify-between">
           <div className="flex-1 flex flex-col justify-center">
             <div className="mb-4">
-              <label className="block font-medium text-sm mb-6">Tipo de reporte</label>
+              <label className="block font-medium text-sm mb-2">Tipo de reporte</label>
               <select
                 name="tipoDeReporte"
                 value={form.tipoDeReporte}
@@ -98,7 +131,7 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-600 mb-6">Asignar seguimiento a:</label>
+              <label className="block text-sm font-medium text-gray-600 mb-2">Asignar seguimiento a:</label>
               <select
                 name="usuarioQueRealizaraElSeguimiento"
                 value={form.usuarioQueRealizaraElSeguimiento}
@@ -107,7 +140,9 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
               >
                 <option value="">Seleccione un usuario</option>
                 {usuarios.map((u) => (
-                  <option key={u._id} value={u._id}>{u.nombre}</option>
+                  <option key={u._id} value={u._id}>
+                    {u.name} {u.surname}
+                  </option>
                 ))}
               </select>
             </div>
