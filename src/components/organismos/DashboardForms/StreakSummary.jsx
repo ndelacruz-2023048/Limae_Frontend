@@ -1,11 +1,13 @@
 import React from 'react';
 
-const StreakSummary = () => {
+import React from 'react';
+
+export const StreakSummary = ({ currentStreak }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <div className="bg-white rounded-2xl shadow-md p-6">
         <h4 className="text-xl font-bold mb-2">Current Streak</h4>
-        <p className="text-gray-600 text-lg">🔥 5 días seguidos</p>
+        <p className="text-gray-600 text-lg">🔥 {currentStreak} días seguidos</p>
       </div>
       <div className="bg-white rounded-2xl shadow-md p-6">
         <h4 className="text-xl font-bold mb-2">Long Streak</h4>
@@ -22,5 +24,3 @@ const StreakSummary = () => {
     </div>
   );
 };
-
-export default StreakSummary;

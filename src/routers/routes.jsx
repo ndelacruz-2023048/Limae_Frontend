@@ -58,7 +58,7 @@ const router = createBrowserRouter([
             },
             {
                 path:"/dashboard-formulario",
-                element:<DashboardForm/>
+                element:<DashboardForm />
             },
             {
                 path: "/notice-list",

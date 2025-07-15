@@ -127,6 +127,33 @@ export const logoutRequest = async()=> {
     }
 }
 
+export const getFormularios = async () => {
+  try {
+    return await apiClient.get('/quiz/list');
+  } catch (e) {
+    return {
+      error: true,
+      e
+    };
+  }
+};
+
+export const createFormulario = async (formularioData) => {
+  try {
+    const res = await apiClient.post('/quiz', formularioData);
+    return res.data;
+  } catch (e) {
+    return {
+      error: true,
+      e,
+    };
+  }
+};
+
+
+
+
+
 
 //Get User Connected to chat
 export const getUserConnected = async () => {

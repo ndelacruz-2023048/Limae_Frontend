@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+// IMPORTACIONES
+import React, { useState, useEffect } from 'react';
+import { getFormularios } from '../../../api/api';
 
-const DailyQuestForm = () => {
+export const DailyQuestForm = ({ streak, setStreak }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     projectName: '',
@@ -8,17 +10,101 @@ const DailyQuestForm = () => {
     question2: '',
   });
   const [showForm, setShowForm] = useState(false);
+  const [formularios, setFormularios] = useState([]);
+  const [currentPreguntas, setCurrentPreguntas] = useState([]);
+  const [reloadCount, setReloadCount] = useState(0);
+  const [lastStreakTime, setLastStreakTime] = useState(null);
+  const maxReloads = 5;
+
+  // Validar y manejar el envío
+  const handleSubmit = () => {
+    let correctas = 0;
+
+    if (
+      currentPreguntas[0] &&
+      currentPreguntas[0].respuesta.trim().toLowerCase() ===
+        formData.projectName.trim().toLowerCase()
+    ) {
+      correctas++;
+    }
+    if (
+      currentPreguntas[1] &&
+      currentPreguntas[1].respuesta.trim().toLowerCase() ===
+        formData.question1.trim().toLowerCase()
+    ) {
+      correctas++;
+    }
+    if (
+      currentPreguntas[2] &&
+      currentPreguntas[2].respuesta.trim().toLowerCase() ===
+        formData.question2.trim().toLowerCase()
+    ) {
+      correctas++;
+    }
+
+    if (correctas >= 2) {
+      const now = new Date();
+      const tenMinutes = 10 * 60 * 1000;
+
+      if (!lastStreakTime || now - new Date(lastStreakTime) >= tenMinutes) {
+        setStreak((prev) => prev + 1);
+        setLastStreakTime(now);
+      }
+
+      alert('✅ ¡Quest completado correctamente!');
+    } else {
+      alert('❌ Debes acertar al menos 2 respuestas para completar el quest.');
+    }
+
+    // Resetear
+    setShowForm(false);
+    setStep(1);
+    setFormData({
+      projectName: '',
+      question1: '',
+      question2: '',
+    });
+  };
+
+  // Cargar formularios al inicio
+  useEffect(() => {
+    const cargarFormularios = async () => {
+      const res = await getFormularios();
+      if (!res.error) {
+        setFormularios(res.data);
+        resetQuest(res.data); // Cargar una pregunta al azar desde el inicio
+      }
+    };
+    cargarFormularios();
+  }, []);
+
+  const resetQuest = (forms = formularios) => {
+    const randomForm = forms[Math.floor(Math.random() * forms.length)];
+
+    if (!randomForm || !randomForm.preguntas || randomForm.preguntas.length < 3) return;
+
+    setCurrentPreguntas(randomForm.preguntas);
+
+    setFormData({
+      projectName: '',
+      question1: '',
+      question2: '',
+    });
+  };
+
+  const reloadQuest = () => {
+    if (reloadCount < maxReloads) {
+      setReloadCount((prev) => prev + 1);
+      resetQuest();
+      setShowForm(false);
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-
   const nextStep = () => setStep((prev) => prev + 1);
   const prevStep = () => setStep((prev) => prev - 1);
-  const handleSubmit = () => {
-    console.log('Form Submitted', formData);
-    alert('Formulario enviado correctamente');
-  };
 
   return (
     <div className="bg-white rounded-2xl shadow-md p-8">
@@ -38,14 +124,15 @@ const DailyQuestForm = () => {
 
             {step === 1 && (
               <div>
-                <h2 className="text-lg font-semibold mb-4">What's the name of your project?</h2>
+                <h2 className="text-lg font-semibold mb-4">
+                  {currentPreguntas[0]?.pregunta || "Cargando pregunta..."}
+                </h2>
                 <input
                   name="projectName"
                   value={formData.projectName}
                   onChange={handleChange}
                   type="text"
                   className="border border-gray-300 rounded-md w-full px-4 py-2 mb-4"
-                  placeholder="AI Content Creator"
                 />
                 <div className="flex justify-end">
                   <button onClick={nextStep} className="bg-purple-600 text-white px-4 py-2 rounded-md">
@@ -57,7 +144,9 @@ const DailyQuestForm = () => {
 
             {step === 2 && (
               <div>
-                <h2 className="text-lg font-semibold mb-4">What problem does your project solve?</h2>
+                <h2 className="text-lg font-semibold mb-4">
+                  {currentPreguntas[1]?.pregunta || "Cargando pregunta..."}
+                </h2>
                 <input
                   name="question1"
                   value={formData.question1}
@@ -74,7 +163,9 @@ const DailyQuestForm = () => {
 
             {step === 3 && (
               <div>
-                <h2 className="text-lg font-semibold mb-4">Who is the target audience?</h2>
+                <h2 className="text-lg font-semibold mb-4">
+                  {currentPreguntas[2]?.pregunta || "Cargando pregunta..."}
+                </h2>
                 <input
                   name="question2"
                   value={formData.question2}
@@ -91,7 +182,7 @@ const DailyQuestForm = () => {
 
             {step === 4 && (
               <div>
-                <h2 className="text-lg font-semibold mb-4">Do you want to submit the form?</h2>
+                <h2 className="text-lg font-semibold mb-4">¿Deseas enviar este quest?</h2>
                 <div className="flex justify-between">
                   <button onClick={prevStep} className="text-purple-600 px-4 py-2">Back</button>
                   <button onClick={handleSubmit} className="bg-green-600 text-white px-4 py-2 rounded-md">Submit</button>
@@ -102,13 +193,19 @@ const DailyQuestForm = () => {
         )}
       </div>
 
-      <div className="flex gap-4">
+      <div className="flex gap-4 mb-6">
         <button
-          className="bg-white border border-gray-300 px-6 py-2 rounded-md shadow hover:bg-gray-100"
-          onClick={() => setShowForm(false)}
+          className={`border px-6 py-2 rounded-md shadow ${
+            reloadCount >= maxReloads
+              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+              : 'bg-white border-gray-300 hover:bg-gray-100'
+          }`}
+          disabled={reloadCount >= maxReloads}
+          onClick={reloadQuest}
         >
-          Reload this quest ($ attempts left)
+          Reload this quest ({maxReloads - reloadCount} attempts left)
         </button>
+
         <button
           className="bg-purple-600 text-white px-6 py-2 rounded-md shadow hover:bg-purple-700"
           onClick={() => setShowForm(true)}
@@ -116,8 +213,26 @@ const DailyQuestForm = () => {
           Start quest
         </button>
       </div>
+
+      {/* Listado de formularios */}
+      <div>
+        <h3 className="text-xl font-bold mb-4">Tus formularios enviados</h3>
+        <ul className="space-y-2">
+          {formularios.map((form) => (
+            <li key={form._id} className="p-3 bg-gray-100 rounded-md shadow-sm">
+              <p><strong>Nombre:</strong> {form.nombreUsuario}</p>
+              <ul className="ml-4 list-disc">
+                {form.preguntas.map((p, i) => (
+                  <li key={p._id}>
+                    <strong>Pregunta:</strong> {p.pregunta} <br />
+                    <strong>Respuesta:</strong> {p.respuesta}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 };
-
-export default DailyQuestForm;
