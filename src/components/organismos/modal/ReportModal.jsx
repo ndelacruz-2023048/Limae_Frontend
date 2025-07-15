@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { UploadImage } from "../../moleculas/UploadImage/UploadImage";
-import { useUploadImage } from "../../../utils/useUploadImage"
+import { useUploadImage } from "../../../utils/useUploadImage";
 import { useUploadImageStore } from "../../../stores/UploadImageStore";
 import { obtenerAdminRequest, crearReporteRequest } from "../../../services/api";
 
@@ -12,8 +12,8 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
     usuarioQueRealizaraElSeguimiento: "",
   });
 
-  const { urlImageFile, isUploadingImage } = useUploadImageStore();
-  const { dataImage, isLoadingImage, registerImage } = useUploadImage();
+  const { dataImageFile, setDataImageFile } = useUploadImageStore();
+  const { registerImage } = useUploadImage();
   const [fileImage, setFileImage] = useState(null);
 
   useEffect(() => {
@@ -32,6 +32,21 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
     fetchUsuarios();
   }, []);
 
+  const resetFormulario = () => {
+    setForm({
+      descripcion: "",
+      tipoDeReporte: "",
+      usuarioQueRealizaraElSeguimiento: "",
+    });
+    setFileImage(null);
+    setDataImageFile(null);
+  };
+
+  const handleClose = () => {
+    resetFormulario();
+    onClose();
+  };
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -42,40 +57,43 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
 
   const handleSubmit = async () => {
     const { descripcion, tipoDeReporte, usuarioQueRealizaraElSeguimiento } = form;
-  
+
     if (!descripcion || !tipoDeReporte || !usuarioQueRealizaraElSeguimiento) {
       alert("Por favor, completa todos los campos antes de continuar.");
       return;
     }
-  
+
     try {
       let imageUrl = "";
-      if (fileImage) {
-        const uploadResult = await registerImage(fileImage);
-        imageUrl = uploadResult?.responseImage?.secure_url || "";
+
+      if (dataImageFile) {
+        const uploadResult = await registerImage(dataImageFile);
+
+        if (uploadResult?.secure_url) {
+          imageUrl = uploadResult.secure_url;
+        } else if (uploadResult?.responseImage?.secure_url) {
+          imageUrl = uploadResult.responseImage.secure_url;
+        } else {
+          console.warn("No se pudo obtener la URL de la imagen.");
+        }
       }
-  
+
       const datos = {
         ...form,
         image: imageUrl,
         usuarioQueHizoElReporte: usuarioActualId,
       };
-  
+
       const res = await crearReporteRequest(datos);
+
       if (!res.error) {
-        console.log("Reporte creado:", res);
-        onClose();
-        setForm({
-          descripcion: "",
-          tipoDeReporte: "",
-          usuarioQueRealizaraElSeguimiento: "",
-        });
-        setFileImage(null);
+        console.log("Reporte creado exitosamente:", res);
+        handleClose(); // Cierra y limpia
       } else {
         alert("Error al crear el reporte: " + res.message);
       }
     } catch (err) {
-      console.error("Error al crear el reporte:", err);
+      console.error("Error inesperado al crear el reporte:", err);
       alert("Error inesperado al crear el reporte.");
     }
   };
@@ -86,7 +104,7 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="w-[60%] h-[50%] max-w-[1200px] flex flex-col lg:flex-row bg-white rounded-lg overflow-hidden shadow-lg relative">
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl z-10"
         >
           ✕
@@ -150,7 +168,7 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
 
           <div className="flex justify-end gap-2 pt-4">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300"
             >
               Cancelar
