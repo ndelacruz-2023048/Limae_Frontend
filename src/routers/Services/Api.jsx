@@ -42,3 +42,26 @@ export const logoutRequest = async()=> {
         }
     }
 }
+
+export const getFormularios = async () => {
+  try {
+    return await apiClient.get('/quiz/list');
+  } catch (e) {
+    return {
+      error: true,
+      e
+    };
+  }
+};
+
+const createFormulario = async (formularioData) => {
+  try {
+    const res = await apiClient.post('/quiz', formularioData);
+    return res.data;
+  } catch (e) {
+    return {
+      error: true,
+      e,
+    };
+  }
+};
