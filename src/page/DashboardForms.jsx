@@ -18,5 +18,3 @@ export const DashboardForm = () => {
     </div>
   );
 };
-
-export default FormsPrueba;
