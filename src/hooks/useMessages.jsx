@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { getMessagesReques } from "../routers/Services/api"
+import { getMessagesReques } from "../routers/Services/Api"
 import { toast } from "sonner";
 import { useSocket } from "./useSocket";
 import { UserAuth } from "../context/AuthContext";
