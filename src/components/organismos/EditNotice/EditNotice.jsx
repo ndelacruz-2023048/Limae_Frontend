@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { updateNotice } from '../../../services/api';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const EditNotice = () => {
   const { id } = useParams();
@@ -14,7 +15,7 @@ const EditNotice = () => {
   const [loading, setLoading] = useState(true);
   const [relatedItems, setRelatedItems] = useState([]);
   const [etiquetas, setEtiquetas] = useState([]);
-  const [etiquetaInput, setEtiquetaInput] = useState([]);
+  const [etiquetaInput, setEtiquetaInput] = useState('');
 
   useEffect(() => {
     const notice = location.state?.notice;
@@ -28,7 +29,7 @@ const EditNotice = () => {
     setPreviewImages(imagenPrincipal);
 
     if (notice.fotografia) {
-      setRelatedItems([{ name: 'Imagen principal', image: notice.fotografia }]);
+      setRelatedItems([{ name: 'Imagen principal', image: notice.fotografia, file: null }]);
     }
 
     setValue('titulo', notice.titulo || '');
@@ -64,16 +65,30 @@ const EditNotice = () => {
     formData.append('cuerpo', data.cuerpo);
     formData.append('autor', data.autor);
     formData.append('url', data.url);
-    formData.append('etiquetas', etiquetas.join(', '));
+    formData.append('etiquetas', etiquetas.join(','));
 
-    const result = await updateNotice(id, formData);
+    const imagenNueva = relatedItems.find(item => item.file);
+    if (imagenNueva?.file) {
+      formData.append('fotografia', imagenNueva.file);
+    }
 
-    if (result?.error) {
-      alert("❌ Error al actualizar la noticia");
-      console.error(result.message || result.error);
-    } else {
-      alert("✅ Noticia actualizada correctamente");
-      navigate("/notice-list");
+    try {
+      const response = await fetch(`${API_URL}/api/v1/noticias/actualizarN/${id}`, {
+        method: 'PUT',
+        body: formData
+      });
+
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        alert("❌ Error al actualizar la noticia");
+        console.error(result.message || result.error);
+      } else {
+        alert("✅ Noticia actualizada correctamente");
+        navigate("/notice-list");
+      }
+    } catch (error) {
+      alert("❌ Error inesperado al actualizar");
+      console.error(error);
     }
   };
 
@@ -81,7 +96,7 @@ const EditNotice = () => {
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      const newImage = { name: file.name, image: imageUrl };
+      const newImage = { name: file.name, image: imageUrl, file };
       setRelatedItems([...relatedItems, newImage]);
       setPreviewImages((prev) => [...prev, imageUrl]);
     }
@@ -89,6 +104,20 @@ const EditNotice = () => {
 
   const handleRemoveRelated = (index) => {
     setRelatedItems((prev) => {
+      const isPrincipal = prev[index].name === 'Imagen principal';
+      const hasNewImage = prev.some((item, idx) => idx !== index && item.file !== null);
+      const isOnlyImage = prev.length === 1;
+
+      if (isOnlyImage) {
+        alert("❌ No puedes eliminar la única imagen.");
+        return prev;
+      }
+
+      if (isPrincipal && !hasNewImage) {
+        alert("❌ No puedes eliminar la imagen principal sin agregar una nueva.");
+        return prev;
+      }
+
       const imageToRemove = prev[index].image;
       setPreviewImages((prevImages) => prevImages.filter((img) => img !== imageToRemove));
       return prev.filter((_, i) => i !== index);
@@ -101,13 +130,13 @@ const EditNotice = () => {
     <div className="max-w-7xl mx-auto px-4 py-8">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid md:grid-cols-3 gap-6 bg-white rounded-xl shadow-lg p-6"
+        className="flex flex-col md:flex-row gap-6 bg-white rounded-xl shadow-lg p-4 sm:p-6"
       >
-        {/* Columna Izquierda */}
-        <div className="col-span-1">
+        {/* Columna izquierda */}
+        <div className="w-full md:w-1/3">
           <h2 className="text-xl font-semibold mb-4">Fotografía</h2>
 
-          <div className="relative w-full h-64 bg-gray-100 rounded-lg overflow-hidden">
+          <div className="relative w-full aspect-square bg-gray-100 rounded-lg overflow-hidden">
             {previewImages.length > 0 ? (
               <>
                 <img
@@ -187,7 +216,7 @@ const EditNotice = () => {
         </div>
 
         {/* Columna derecha */}
-        <div className="col-span-2 space-y-4">
+        <div className="w-full md:w-2/3 space-y-4">
           <h2 className="text-xl font-semibold">Editar Noticia</h2>
 
           <input
@@ -244,7 +273,7 @@ const EditNotice = () => {
                   </span>
                 ))}
               </div>
-              <div className="flex gap-2">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="text"
                   value={etiquetaInput}
@@ -263,7 +292,7 @@ const EditNotice = () => {
             </div>
           </div>
 
-          <div className="flex justify-end gap-4">
+          <div className="flex justify-end gap-4 flex-wrap">
             <button
               type="button"
               onClick={() => navigate('/notice-list')}
@@ -273,7 +302,6 @@ const EditNotice = () => {
             </button>
             <button
               type="submit"
-              onClick={() => navigate('/notice-list')}
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
             >
               Actualizar Noticia
