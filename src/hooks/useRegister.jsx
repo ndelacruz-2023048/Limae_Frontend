@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { registerRequest } from '../routers/Services/api';
+import { registerRequest } from '../routers/Services/Api';
 import { toast } from 'sonner';
 
 export const useRegister = () => {
