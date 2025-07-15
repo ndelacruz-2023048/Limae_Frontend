@@ -44,7 +44,6 @@ export const RegisterForm = () => {
 
     const onSubmit = async(data) => {
         if (stepper.isLast) {
-            console.log('Registro completo:', data);
 
             try {
                 const success = await nuevo(data); // Intenta registrar el usuario
@@ -60,7 +59,6 @@ export const RegisterForm = () => {
                 console.error('Error al registrar:', error);
             }
         } else {
-            console.log('Datos del paso actual:', data);
             stepper.next();
         }
     }
