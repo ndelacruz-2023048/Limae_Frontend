@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { updateNotice } from '../../../services/api';
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 const EditNotice = () => {
   const { id } = useParams();
@@ -14,7 +15,7 @@ const EditNotice = () => {
   const [loading, setLoading] = useState(true);
   const [relatedItems, setRelatedItems] = useState([]);
   const [etiquetas, setEtiquetas] = useState([]);
-  const [etiquetaInput, setEtiquetaInput] = useState([]);
+  const [etiquetaInput, setEtiquetaInput] = useState('');
 
   useEffect(() => {
     const notice = location.state?.notice;
@@ -28,7 +29,7 @@ const EditNotice = () => {
     setPreviewImages(imagenPrincipal);
 
     if (notice.fotografia) {
-      setRelatedItems([{ name: 'Imagen principal', image: notice.fotografia }]);
+      setRelatedItems([{ name: 'Imagen principal', image: notice.fotografia, file: null }]);
     }
 
     setValue('titulo', notice.titulo || '');
@@ -64,16 +65,32 @@ const EditNotice = () => {
     formData.append('cuerpo', data.cuerpo);
     formData.append('autor', data.autor);
     formData.append('url', data.url);
-    formData.append('etiquetas', etiquetas.join(', '));
+    formData.append('etiquetas', etiquetas.join(','));
 
-    const result = await updateNotice(id, formData);
+    const imagenNueva = relatedItems.find(item => item.file);
+    if (imagenNueva?.file) {
+      formData.append('fotografia', imagenNueva.file);
+    }
 
-    if (result?.error) {
-      alert("❌ Error al actualizar la noticia");
-      console.error(result.message || result.error);
-    } else {
-      alert("✅ Noticia actualizada correctamente");
-      navigate("/notice-list");
+    try {
+      const response = await fetch(`${API_URL}/api/v1/noticias/actualizarN/${id}`, {
+        method: 'PUT',
+        body: formData
+      });
+
+      const result = await response.json();
+      console.log("Respuesta cruda del backend:", result);
+
+      if (!response.ok || !result.success) {
+        alert("❌ Error al actualizar la noticia");
+        console.error(result.message || result.error);
+      } else {
+        alert("✅ Noticia actualizada correctamente");
+        navigate("/notice-list");
+      }
+    } catch (error) {
+      alert("❌ Error inesperado al actualizar");
+      console.error(error);
     }
   };
 
@@ -81,7 +98,7 @@ const EditNotice = () => {
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
-      const newImage = { name: file.name, image: imageUrl };
+      const newImage = { name: file.name, image: imageUrl, file };
       setRelatedItems([...relatedItems, newImage]);
       setPreviewImages((prev) => [...prev, imageUrl]);
     }
@@ -89,6 +106,20 @@ const EditNotice = () => {
 
   const handleRemoveRelated = (index) => {
     setRelatedItems((prev) => {
+      const isPrincipal = prev[index].name === 'Imagen principal';
+      const hasNewImage = prev.some((item, idx) => idx !== index && item.file !== null);
+      const isOnlyImage = prev.length === 1;
+
+      if (isOnlyImage) {
+        alert("❌ No puedes eliminar la única imagen.");
+        return prev;
+      }
+
+      if (isPrincipal && !hasNewImage) {
+        alert("❌ No puedes eliminar la imagen principal sin agregar una nueva.");
+        return prev;
+      }
+
       const imageToRemove = prev[index].image;
       setPreviewImages((prevImages) => prevImages.filter((img) => img !== imageToRemove));
       return prev.filter((_, i) => i !== index);
@@ -273,7 +304,6 @@ const EditNotice = () => {
             </button>
             <button
               type="submit"
-              onClick={() => navigate('/notice-list')}
               className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg"
             >
               Actualizar Noticia

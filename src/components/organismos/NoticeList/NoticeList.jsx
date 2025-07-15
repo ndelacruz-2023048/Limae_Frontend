@@ -1,55 +1,74 @@
 import { useState, useEffect } from "react";
 import { MoreVertical } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { deleteNotice, obtenerNoticiasRequest } from "../../../services/api";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/es";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
 dayjs.extend(relativeTime);
 dayjs.locale("es");
 
-
 export const NoticeList = () => {
   const [noticias, setNoticias] = useState([]);
-  const navigate = useNavigate();
   const [menuOpenId, setMenuOpenId] = useState(null);
   const [recentPosts, setRecentPosts] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchNoticias = async () => {
-      const res = await obtenerNoticiasRequest();
-      if (!res.error) {
-        const reversed = res.data.reverse();
-        setNoticias(reversed);
-        setRecentPosts(
-          reversed.slice(0, 5).map((n, idx) => ({
-            id: n._id,
-            title: n.titulo,
-            author: n.autor || "@desconocido",
-            link: n.url || "#",
-            image: n.fotografia || null,
-          }))
-        );
+      try {
+        const res = await fetch(`${API_URL}/api/v1/noticias/obtenerN`);
+        const data = await res.json();
+        if (res.ok) {
+          const reversed = data.noticias.reverse();
+          setNoticias(reversed);
+          setRecentPosts(
+            reversed.slice(0, 5).map((n) => ({
+              id: n._id,
+              title: n.titulo,
+              author: n.autor || "@desconocido",
+              link: n.url || "#",
+              image: n.fotografia || null,
+            }))
+          );
+        } else {
+          console.error("❌ Error al obtener noticias:", data.message);
+        }
+      } catch (error) {
+        console.error("❌ Error de red al obtener noticias:", error);
       }
     };
+
     fetchNoticias();
   }, []);
 
   const handleClear = () => {
-    setRecentPosts([]); 
-  }
+    setRecentPosts([]);
+  };
 
   const handleEliminar = async (id) => {
-    const confirmacion = window.confirm("¿Seguro que quieres eliminar esta noticia?")
-    if (!confirmacion) return
+    const confirmacion = window.confirm("¿Seguro que quieres eliminar esta noticia?");
+    if (!confirmacion) return;
+
     try {
-      await deleteNotice(id);
-      setNoticias(noticias.filter((n) => n._id !== id))
-      setRecentPosts(recentPosts.filter((r) => r.id !== id));
+      const res = await fetch(`${API_URL}/api/v1/noticias/eliminarN/${id}`, {
+        method: "DELETE",
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setNoticias((prev) => prev.filter((n) => n._id !== id));
+        setRecentPosts((prev) => prev.filter((r) => r.id !== id));
+      } else {
+        console.error("❌ Error al eliminar:", data.message);
+      }
     } catch (error) {
-      console.error("Error eliminando:", error)
+      console.error("❌ Error de red al eliminar:", error);
     }
-  }
+  };
 
   return (
     <div className="flex gap-6 w-full">
@@ -71,10 +90,18 @@ export const NoticeList = () => {
               </button>
               {menuOpenId === notice._id && (
                 <div className="absolute right-0 mt-2 w-28 bg-white border rounded shadow z-10">
-                  <button className="w-full px-4 py-2 hover:bg-gray-100 text-left" onClick={() => navigate(`/edit-notice/${notice._id}`, { state: { notice }})}>
+                  <button
+                    className="w-full px-4 py-2 hover:bg-gray-100 text-left"
+                    onClick={() =>
+                      navigate(`/edit-notice/${notice._id}`, { state: { notice } })
+                    }
+                  >
                     Editar
                   </button>
-                  <button className="w-full px-4 py-2 hover:bg-gray-100 text-left text-red-500" onClick={() => handleEliminar(notice._id)}>
+                  <button
+                    className="w-full px-4 py-2 hover:bg-gray-100 text-left text-red-500"
+                    onClick={() => handleEliminar(notice._id)}
+                  >
                     Eliminar
                   </button>
                 </div>
@@ -92,11 +119,11 @@ export const NoticeList = () => {
               <div className="flex-1">
                 <div className="flex text-sm text-gray-500 mb-1 max-w-[94%]">
                   <span>{notice.autor || "@desconocido"}</span>
-                  <span className="ml-auto">{dayjs(notice.createdAt).fromNow()}</span>
+                  <span className="ml-auto">
+                    {dayjs(notice.createdAt).fromNow()}
+                  </span>
                 </div>
-                <a
-                  className="text-lg font-semibold text-blue-700 hover:underline"
-                >
+                <a className="text-lg font-semibold text-blue-700 hover:underline">
                   {notice.titulo}
                 </a>
                 <p className="text-sm mt-2 text-gray-700">{notice.entrada}</p>
