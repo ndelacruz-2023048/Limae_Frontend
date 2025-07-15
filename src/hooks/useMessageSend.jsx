@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { sendMessageRequest } from "../routers/Services/api";
+import { sendMessageRequest } from "../routers/Services/Api";
 import { toast } from "sonner";
 
 export const useMessage = () => {
