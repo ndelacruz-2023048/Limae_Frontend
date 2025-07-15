@@ -3,7 +3,7 @@ import DailyQuestForm from '../components/organismos/DashboardForms/DailyQuestFo
 import QuestHistory from '../components/organismos/DashboardForms/QuestHistory';
 import StreakSummary from '../components/organismos/DashboardForms/StreakSummary';
 
-const DashboardForm = () => {
+export const DashboardForm = () => {
   return (
     <div className="min-h-screen bg-gradient-to-tr from-[#f0f4ff] to-[#eef5fb] flex flex-col items-center justify-center px-10 py-14 text-[18px]">
       <div className="w-full max-w-7xl flex flex-col lg:flex-row gap-10">
