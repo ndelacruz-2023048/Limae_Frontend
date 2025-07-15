@@ -92,23 +92,35 @@ export const crearReporteRequest = async (datos) => {
         return {
             error: true,
             error
-        };
+        }
     }
-};
+}
 
 const apiUsuario = axios.create({
     baseURL: `${API_URL}/api/v1/usuarios`,
     timeout: 2000,
-});
+})
   
-  export const obtenerUsuariosRequest = async () => {
+export const obtenerUsuariosRequest = async () => {
     try {
-        const res = await apiUsuario.get('/');
+        const res = await apiUsuario.get('/users');
         return res.data;
     } catch (error) {
         return {
             error: true,
             error
-        };
+        }
     }
-};
+}
+
+export const obtenerAdminRequest = async () => {
+    try {
+        const res = await apiUsuario.get('/admin');
+        return res.data;
+    } catch (error) {
+        return {
+            error: true,
+            error
+        }
+    }
+}
