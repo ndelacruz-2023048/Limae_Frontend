@@ -1,9 +1,37 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import Cookies from 'js-cookie'
 import { socketConnection } from '../socket/Socket';
-import {jwtDecode} from 'jwt-decode'
+import { jwtDecode } from 'jwt-decode'
 
 const AuthContext = createContext();
+
+// Helper function para configuración de cookies
+const getCookieConfig = () => {
+    const hostname = window.location.hostname;
+
+    if (hostname.includes('limae.org')) {
+        return {
+            domain: '.limae.org',
+            secure: true,
+            sameSite: 'none',
+            path: '/'
+        };
+    } else if (hostname.includes('amplifyapp.com')) {
+        return {
+            domain: '.amplifyapp.com',
+            secure: true,
+            sameSite: 'none',
+            path: '/'
+        };
+    } else {
+        // Para desarrollo local
+        return {
+            secure: false,
+            sameSite: 'lax',
+            path: '/'
+        };
+    }
+};
 
 export const AuthContextProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -15,15 +43,15 @@ export const AuthContextProvider = ({ children }) => {
         socketConnection.connect();
 
         socketConnection.on("connect", () => {
-        console.log("✅ Conectado al servidor con id:", socketConnection.id);
+            console.log("✅ Conectado al servidor con id:", socketConnection.id);
         });
 
         socketConnection.on("disconnect", () => {
-        console.log("❌ Desconectado del servidor");
+            console.log("❌ Desconectado del servidor");
         });
 
         return () => {
-        socketConnection.disconnect(); // solo si cierras la app
+            socketConnection.disconnect(); // solo si cierras la app
         };
     }, [])
 
@@ -34,19 +62,19 @@ export const AuthContextProvider = ({ children }) => {
             setIsAuthenticated(true)
 
             try {
-            const decoded = jwtDecode(userData);
-            const userId = decoded?.uid;
+                const decoded = jwtDecode(userData);
+                const userId = decoded?.uid;
 
-            if (userId && !socketConnection.connected) {
-                socketConnection.io.opts.query = {
-                    userId // ✅ Pasamos el userId en la conexión
-                };
-                socketConnection.auth = { token: userData }; // opcional
-                socketConnection.connect();
+                if (userId && !socketConnection.connected) {
+                    socketConnection.io.opts.query = {
+                        userId // ✅ Pasamos el userId en la conexión
+                    };
+                    socketConnection.auth = { token: userData }; // opcional
+                    socketConnection.connect();
+                }
+            } catch (error) {
+                console.error("Error al decodificar token:", error);
             }
-        } catch (error) {
-            console.error("Error al decodificar token:", error);
-        }
 
         } else {
             setUser(null);
@@ -59,12 +87,9 @@ export const AuthContextProvider = ({ children }) => {
     const clearAuthUser = () => {
         setUser(null);
         setIsAuthenticated(false);
-        Cookies.remove('token', {
-            domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
-            secure: true,
-            sameSite: 'none',
-            path: '/'
-        });
+        const cookieConfig = getCookieConfig();
+        Cookies.remove('token', cookieConfig);
+        Cookies.remove('refreshtoken', cookieConfig);
         socketConnection.disconnect()
         setLoading(false);
     };
@@ -83,11 +108,8 @@ export const AuthContextProvider = ({ children }) => {
 
     // Cargar sesión desde cookies al iniciar
     useEffect(() => {
-        const token = Cookies.get('token', {
-            domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
-            secure: true,
-            sameSite: 'none'
-        });
+        const cookieConfig = getCookieConfig();
+        const token = Cookies.get('token', cookieConfig);
         if (token) {
             setAuthUser(token);
         } else {
@@ -97,20 +119,17 @@ export const AuthContextProvider = ({ children }) => {
 
     // NUEVA FUNCIÓN: Función para actualizar el contexto de autenticación
     const refreshAuthContext = async () => {
-        const token = Cookies.get('token', {
-            domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
-            secure: true,
-            sameSite: 'none'
-        });
+        const cookieConfig = getCookieConfig();
+        const token = Cookies.get('token', cookieConfig);
         if (token) {
             setUser(token);
             setIsAuthenticated(true);
-            
+
             // IMPORTANTE: También actualizar el socket con el nuevo token
             try {
                 const decoded = jwtDecode(token);
                 const userId = decoded?.uid;
-                
+
                 if (userId && socketConnection.connected) {
                     socketConnection.auth = { token }; // Actualizar el token en el socket
                 }
@@ -126,12 +145,9 @@ export const AuthContextProvider = ({ children }) => {
     // NUEVO: Listener para cambios en las cookies
     useEffect(() => {
         const checkTokenChanges = () => {
-            const currentToken = Cookies.get('token', {
-                domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
-                secure: true,
-                sameSite: 'none'
-            });
-            
+            const cookieConfig = getCookieConfig();
+            const currentToken = Cookies.get('token', cookieConfig);
+
             // Solo actualizar si el token cambió
             if (currentToken !== user) {
                 if (currentToken) {
@@ -149,11 +165,11 @@ export const AuthContextProvider = ({ children }) => {
     }, [user]); // Depende de user para detectar cambios
 
     return (
-        <AuthContext.Provider value={{ 
-            user, 
-            isAuthenticated, 
+        <AuthContext.Provider value={{
+            user,
+            isAuthenticated,
             loading,
-            setAuthUser, 
+            setAuthUser,
             clearAuthUser,
             refreshAuthContext,
             isOnline,
