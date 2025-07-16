@@ -7,14 +7,20 @@ import relativeTime from 'dayjs/plugin/relativeTime'
 dayjs.extend(duration)
 dayjs.extend(relativeTime)
 
-export const CardReporte = ({numeroReporte,tipoDeReporte,seccion,profesor,alumno,image,createdAt}) => {
+export const CardReporte = ({numeroReporte,tipoDeReporte,seccion,profesor,alumno,image,createdAt, onClick}) => {
   return (
-    <div className="w-full sm:w-[80%] md:w-[60%] lg:w-[40%] xl:w-[30%] min-h-[400px] max-h-[500px] bg-white rounded-3xl shadow-lg p-3 sm:p-6 md:p-8 relative overflow-visible mx-auto">
+    <div className="w-full sm:w-[80%] md:w-[60%] lg:w-[40%] xl:w-[30%] min-h-[400px] max-h-[500px] bg-white rounded-3xl shadow-lg p-3 sm:p-6 md:p-8 relative overflow-visible mx-auto cursor-pointer hover:shadow-xl transition-shadow"
+    onClick={onClick}>
 
       {/* Perfil y datos principales */}
       <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6">
+
         {/* Foto de perfil */}
-        <img src={image}alt="profile" className="w-20 h-20 rounded-full object-cover border-4 border-white shadow" />
+        <img 
+  src={image || 'https://via.placeholder.com/80'} 
+  alt="profile" 
+  className="w-20 h-20 rounded-full object-cover border-4 border-white shadow" 
+/>
         <div className="flex-1">
           <div className="flex items-center gap-2">
             <h2 className="font-bold text-xl text-gray-900">{numeroReporte}</h2>
