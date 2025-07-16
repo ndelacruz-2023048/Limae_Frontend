@@ -4,7 +4,8 @@ const API_URL = import.meta.env.VITE_API_URL
 const apiReport = axios.create(
     {
         baseURL: `${API_URL}/api/v1/reportes`,
-        timeout: 2000
+        timeout: 2000,
+        withCredentials: true
     }
 )
 
