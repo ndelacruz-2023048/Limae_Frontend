@@ -80,8 +80,7 @@ export const ReportModal = ({ isOpen, onClose, usuarioActualId }) => {
 
       const datos = {
         ...form,
-        image: imageUrl,
-        usuarioQueHizoElReporte: usuarioActualId,
+        image: imageUrl
       };
 
       const res = await crearReporteRequest(datos);
