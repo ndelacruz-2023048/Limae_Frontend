@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { SidebarChat } from '../../sidebar/sidebarChat';
 import { ChatContainer } from '../organismos/ChatContainer';
-
+import {SidebarChat} from "../../sidebar/SidebarChat"
 export const ChatModal = ({ isOpen, onClose }) => {
     const [selectedUser, setSelectedUser] = useState(null);
 

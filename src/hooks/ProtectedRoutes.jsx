@@ -6,7 +6,7 @@ export const ProtectedRoutes = ({ children, accesBy }) => {
 
 
     if (loading) {
-        return <div>Cargando...</div>; // Muestra un indicador de carga
+        return <div>Cargando... </div>; // Muestra un indicador de carga
     }
 
     if (accesBy === "non-authenticated") {
