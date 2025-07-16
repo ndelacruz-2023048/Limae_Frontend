@@ -63,6 +63,8 @@ export const AuthContextProvider = ({ children }) => {
 
             try {
                 const decoded = jwtDecode(userData);
+                console.log(decoded);
+                
                 const userId = decoded?.uid;
 
                 if (userId && !socketConnection.connected) {

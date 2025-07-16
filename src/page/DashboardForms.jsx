@@ -13,7 +13,9 @@ export const DashboardForm = () => {
     if (user) {
       try {
         const decoded = jwtDecode(user);
-        setType(decoded?.rol || decoded?.type || '');
+        console.log(decoded);
+        
+        setType(decoded?.role || decoded?.type || '');
       } catch (e) {
         console.error('Error al decodificar el token:', e);
       }

@@ -4,23 +4,29 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { useFetchNotices } from '../../../../hooks/useFetchNotices';
 import { useFetchReportes } from '../../../../hooks/useFetchReportes';
 import { useFetchEstudiantes } from '../../../../hooks/useFetchEstudiantes';
+import { UserAuth } from '../../../context/AuthContext';
+import es from 'dayjs/locale/es';
+import { GenerateInitialsAvatar } from '../../../utils/Avatar';
 
 export const ComponetsDashboardAdmin = () => {
   const navigate = useNavigate();
   const { notices } = useFetchNotices();
   const { reportes } = useFetchReportes();
-  const { estudiantes } = useFetchEstudiantes();
-
+  const { estudiantes } = useFetchEstudiantes();  
   const ultimaNoticia = notices[0];
   const ultimasNoticias = notices.slice(0, 5);
   const ultimosReportes = reportes.slice(0, 5);
   const ultimosEstudiantes = estudiantes.slice(0, 5);
-
+  console.log(ultimosEstudiantes);
+  
   const groupedByCountry = estudiantes.reduce((acc, estudiante) => {
     const country = estudiante.country || 'Desconocido';
     acc[country] = (acc[country] || 0) + 1;
     return acc;
   }, {});
+
+  console.log(estudiantes);
+  
 
   const studentData = Object.entries(groupedByCountry).map(([name, value]) => ({
     name,
@@ -150,11 +156,7 @@ export const ComponetsDashboardAdmin = () => {
           <ul className="space-y-3">
             {ultimosEstudiantes.map(e => (
               <li key={e._id} className="flex items-center gap-4 p-3 rounded-xl bg-white/30 hover:bg-white/50 transition shadow">
-                <img
-                  src={e.profilePicture || 'https://via.placeholder.com/40'}
-                  className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
-                  alt={e.name}
-                />
+                <GenerateInitialsAvatar name={e.name} surname={e.surname} />
                 <div>
                   <p className="font-semibold text-gray-800">{e.name} {e.surname}</p>
                 </div>

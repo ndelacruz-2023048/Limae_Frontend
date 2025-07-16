@@ -19,6 +19,8 @@ export const useLogin = () => {
             rememberMe: rememberMe || false
         };
         const response = await loginRequest(user);
+        console.log(response);
+        
         setIsLoading(false);
 
         if (response.error) {

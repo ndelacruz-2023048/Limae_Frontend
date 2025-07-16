@@ -14,6 +14,7 @@ import { ProtectedRoutes } from '../hooks/ProtectedRoutes'
 import { RegisterPage } from '../page/RegisterPage'
 import { NotFound } from '../page/NotFund'
 import NoticeListpage from '../page/NoticeListPage'
+import { HomeLimae } from '../page/HomeLimae'
 
 const router = createBrowserRouter([
     {
@@ -22,7 +23,7 @@ const router = createBrowserRouter([
         children:[
             {
                 index: true,
-                element:<h1>Home</h1>
+                element:<HomeLimae/>
             },
             {
                 path:"/detalle-reporte",
