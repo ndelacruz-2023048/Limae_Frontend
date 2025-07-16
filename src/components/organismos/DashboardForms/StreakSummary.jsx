@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 
-const TEN_SECONDS_MS = 10 * 1000;
-const TWENTY_SECONDS_MS = 20 * 1000;
+const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
 export const StreakSummary = ({ onStreakChange, triggerUpdate }) => {
-  // Estados internos
   const [streak, setStreak] = useState(() => {
     const data = localStorage.getItem('streakCount');
     return data ? parseInt(data, 10) : 0;
@@ -34,16 +33,16 @@ export const StreakSummary = ({ onStreakChange, triggerUpdate }) => {
       return;
     }
 
-    const diffSec = (now - last) / 1000;
+    const diffMs = now - last;
 
-    if (diffSec < 10) {
-      // No sumar, tiempo insuficiente
+    if (diffMs < TWELVE_HOURS_MS) {
+      // Aún no han pasado 12 horas
       setLimitReached(true);
       return;
     }
 
-    if (diffSec > 20) {
-      // Pasaron más de 20 segundos, pierde la racha
+    if (diffMs > TWENTY_FOUR_HOURS_MS) {
+      // Pasaron más de 24 horas, pierde la racha
       localStorage.setItem('streakCount', '0');
       localStorage.setItem('lastAnswered', now.toISOString());
       setStreak(0);
@@ -53,7 +52,7 @@ export const StreakSummary = ({ onStreakChange, triggerUpdate }) => {
       return;
     }
 
-    // Si paso 10 segundos o más y menos de 20 segundos, suma la racha
+    // Pasaron al menos 12h y menos de 24h → sumar racha
     const newCount = count + 1;
     localStorage.setItem('streakCount', newCount.toString());
     localStorage.setItem('lastAnswered', now.toISOString());
@@ -63,15 +62,12 @@ export const StreakSummary = ({ onStreakChange, triggerUpdate }) => {
     if (onStreakChange) onStreakChange(newCount);
   };
 
-
-  // Cuando cambia triggerUpdate, ejecutamos updateStreakData
   useEffect(() => {
     if (triggerUpdate) {
       updateStreakData();
     }
   }, [triggerUpdate]);
 
-  // Limpiar mensajes después de 5 segundos
   useEffect(() => {
     if (streakLost) {
       const timer = setTimeout(() => setStreakLost(false), 5000);
@@ -93,12 +89,12 @@ export const StreakSummary = ({ onStreakChange, triggerUpdate }) => {
         <p className="text-gray-600 text-lg">🔥 {streak} días seguidos</p>
         {streakLost && (
           <p className="text-red-600 font-bold mt-2">
-            ⚠️ La racha se perdió porque pasaron más de 20 segundos sin responder.
+            ⚠️ La racha se perdió porque pasaron más de 24 horas sin responder.
           </p>
         )}
         {limitReached && (
           <p className="text-yellow-600 font-bold mt-2">
-            ⏳ Solo puedes responder un cuestionario cada 10 segundos.
+            ⏳ Solo puedes responder una vez cada 12 horas.
           </p>
         )}
       </div>
