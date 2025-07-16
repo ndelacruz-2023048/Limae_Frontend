@@ -5,6 +5,34 @@ import { jwtDecode } from 'jwt-decode'
 
 const AuthContext = createContext();
 
+// Helper function para configuración de cookies
+const getCookieConfig = () => {
+    const hostname = window.location.hostname;
+
+    if (hostname.includes('limae.org')) {
+        return {
+            domain: '.limae.org',
+            secure: true,
+            sameSite: 'none',
+            path: '/'
+        };
+    } else if (hostname.includes('amplifyapp.com')) {
+        return {
+            domain: '.amplifyapp.com',
+            secure: true,
+            sameSite: 'none',
+            path: '/'
+        };
+    } else {
+        // Para desarrollo local
+        return {
+            secure: false,
+            sameSite: 'lax',
+            path: '/'
+        };
+    }
+};
+
 export const AuthContextProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -59,18 +87,9 @@ export const AuthContextProvider = ({ children }) => {
     const clearAuthUser = () => {
         setUser(null);
         setIsAuthenticated(false);
-        Cookies.remove('token', {
-            domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
-            secure: true,
-            sameSite: 'none',
-            path: '/'
-        });
-        Cookies.remove('refreshtoken', {
-            domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
-            secure: true,
-            sameSite: 'none',
-            path: '/'
-        });
+        const cookieConfig = getCookieConfig();
+        Cookies.remove('token', cookieConfig);
+        Cookies.remove('refreshtoken', cookieConfig);
         socketConnection.disconnect()
         setLoading(false);
     };
@@ -89,11 +108,8 @@ export const AuthContextProvider = ({ children }) => {
 
     // Cargar sesión desde cookies al iniciar
     useEffect(() => {
-        const token = Cookies.get('token', {
-            domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
-            secure: true,
-            sameSite: 'none'
-        });
+        const cookieConfig = getCookieConfig();
+        const token = Cookies.get('token', cookieConfig);
         if (token) {
             setAuthUser(token);
         } else {
@@ -103,11 +119,8 @@ export const AuthContextProvider = ({ children }) => {
 
     // NUEVA FUNCIÓN: Función para actualizar el contexto de autenticación
     const refreshAuthContext = async () => {
-        const token = Cookies.get('token', {
-            domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
-            secure: true,
-            sameSite: 'none'
-        });
+        const cookieConfig = getCookieConfig();
+        const token = Cookies.get('token', cookieConfig);
         if (token) {
             setUser(token);
             setIsAuthenticated(true);
@@ -132,11 +145,8 @@ export const AuthContextProvider = ({ children }) => {
     // NUEVO: Listener para cambios en las cookies
     useEffect(() => {
         const checkTokenChanges = () => {
-            const currentToken = Cookies.get('token', {
-                domain: window.location.hostname.includes('amplifyapp.com') ? '.amplifyapp.com' : undefined,
-                secure: true,
-                sameSite: 'none'
-            });
+            const cookieConfig = getCookieConfig();
+            const currentToken = Cookies.get('token', cookieConfig);
 
             // Solo actualizar si el token cambió
             if (currentToken !== user) {
