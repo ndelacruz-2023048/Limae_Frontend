@@ -127,28 +127,38 @@ export const logoutRequest = async()=> {
     }
 }
 
-export const getFormularios = async () => {
+export const getCuestionariosConRespuestas = async () => {
+    try {
+        const res = await apiClient.get('/quiz/list')
+        return res.data;
+    } catch (e) {
+        return { error: true, e };
+    }
+};
+
+export const crearCuestionario = async (data) => {
   try {
-    return await apiClient.get('/quiz/list');
+    const res = await apiClient.post('/quiz', data)
+    return res.data
   } catch (e) {
     return {
       error: true,
       e
-    };
+    }
   }
-};
+}
 
-export const createFormulario = async (formularioData) => {
+export const responderCuestionario = async (data) => {
   try {
-    const res = await apiClient.post('/quiz', formularioData);
-    return res.data;
+    const res = await apiClient.post('/quiz/responder', data)
+    return res.data
   } catch (e) {
     return {
       error: true,
-      e,
-    };
+      e
+    }
   }
-};
+}
 
 
 

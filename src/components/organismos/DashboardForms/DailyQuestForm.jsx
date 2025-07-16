@@ -1,238 +1,232 @@
-// IMPORTACIONES
-import React, { useState, useEffect } from 'react';
-import { getFormularios } from '../../../api/api';
+import { useState, useEffect } from 'react';
+import { getCuestionariosConRespuestas, responderCuestionario } from '../../../routers/Services/Api.jsx';
+import { StreakSummary } from './StreakSummary.jsx';
 
-export const DailyQuestForm = ({ streak, setStreak }) => {
+export const DailyQuestForm = () => {
+  // Estados cuestionarios y formulario
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState({
-    projectName: '',
-    question1: '',
-    question2: '',
-  });
-  const [showForm, setShowForm] = useState(false);
-  const [formularios, setFormularios] = useState([]);
-  const [currentPreguntas, setCurrentPreguntas] = useState([]);
-  const [reloadCount, setReloadCount] = useState(0);
-  const [lastStreakTime, setLastStreakTime] = useState(null);
-  const maxReloads = 5;
+  const [nombreUsuario, setNombreUsuario] = useState('');
+  const [formData, setFormData] = useState({ respuesta1: '', respuesta2: '', respuesta3: '' });
+  const [cuestionarios, setCuestionarios] = useState([]);
+  const [preguntasActuales, setPreguntasActuales] = useState([]);
+  const [cuestionarioSeleccionado, setCuestionarioSeleccionado] = useState(null);
+  const [iniciado, setIniciado] = useState(false);
+  const [respuestasEnviadas, setRespuestasEnviadas] = useState(null);
 
-  // Validar y manejar el envío
-  const handleSubmit = () => {
-    let correctas = 0;
+  // Estados para manejar botón iniciar y trigger para actualizar racha
+  const [puedeIniciar, setPuedeIniciar] = useState(true);
+  const [triggerStreakUpdate, setTriggerStreakUpdate] = useState(false);
 
-    if (
-      currentPreguntas[0] &&
-      currentPreguntas[0].respuesta.trim().toLowerCase() ===
-        formData.projectName.trim().toLowerCase()
-    ) {
-      correctas++;
-    }
-    if (
-      currentPreguntas[1] &&
-      currentPreguntas[1].respuesta.trim().toLowerCase() ===
-        formData.question1.trim().toLowerCase()
-    ) {
-      correctas++;
-    }
-    if (
-      currentPreguntas[2] &&
-      currentPreguntas[2].respuesta.trim().toLowerCase() ===
-        formData.question2.trim().toLowerCase()
-    ) {
-      correctas++;
-    }
+  const TEN_SECONDS_MS = 10 * 1000;
 
-    if (correctas >= 2) {
-      const now = new Date();
-      const tenMinutes = 10 * 60 * 1000;
-
-      if (!lastStreakTime || now - new Date(lastStreakTime) >= tenMinutes) {
-        setStreak((prev) => prev + 1);
-        setLastStreakTime(now);
-      }
-
-      alert('✅ ¡Quest completado correctamente!');
-    } else {
-      alert('❌ Debes acertar al menos 2 respuestas para completar el quest.');
-    }
-
-    // Resetear
-    setShowForm(false);
-    setStep(1);
-    setFormData({
-      projectName: '',
-      question1: '',
-      question2: '',
-    });
-  };
-
-  // Cargar formularios al inicio
+  // Cargar cuestionarios y seleccionar aleatorio
   useEffect(() => {
-    const cargarFormularios = async () => {
-      const res = await getFormularios();
+    const cargar = async () => {
+      const res = await getCuestionariosConRespuestas();
       if (!res.error) {
-        setFormularios(res.data);
-        resetQuest(res.data); // Cargar una pregunta al azar desde el inicio
+        setCuestionarios(res.cuestionarios);
+        seleccionarRandom(res.cuestionarios);
       }
     };
-    cargarFormularios();
+    cargar();
   }, []);
 
-  const resetQuest = (forms = formularios) => {
-    const randomForm = forms[Math.floor(Math.random() * forms.length)];
-
-    if (!randomForm || !randomForm.preguntas || randomForm.preguntas.length < 3) return;
-
-    setCurrentPreguntas(randomForm.preguntas);
-
-    setFormData({
-      projectName: '',
-      question1: '',
-      question2: '',
-    });
-  };
-
-  const reloadQuest = () => {
-    if (reloadCount < maxReloads) {
-      setReloadCount((prev) => prev + 1);
-      resetQuest();
-      setShowForm(false);
+  // Control botón iniciar según tiempo desde última respuesta
+  useEffect(() => {
+    const last = getLastAnswered();
+    if (last) {
+      const diffMs = new Date() - last;
+      setPuedeIniciar(diffMs >= TEN_SECONDS_MS);
+    } else {
+      setPuedeIniciar(true);
     }
+  }, []);
+
+  const seleccionarRandom = (lista) => {
+    const aleatorio = lista[Math.floor(Math.random() * lista.length)];
+    if (!aleatorio || !aleatorio.preguntas || aleatorio.preguntas.length < 3) return;
+    setPreguntasActuales(aleatorio.preguntas);
+    setCuestionarioSeleccionado(aleatorio);
+    setFormData({ respuesta1: '', respuesta2: '', respuesta3: '' });
+    setStep(1);
   };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
-  const nextStep = () => setStep((prev) => prev + 1);
-  const prevStep = () => setStep((prev) => prev - 1);
+
+  const getLastAnswered = () => {
+    const last = localStorage.getItem('lastAnswered');
+    return last ? new Date(last) : null;
+  };
+
+  const handleSubmit = async () => {
+    if (!nombreUsuario.trim()) {
+      alert('Por favor ingresa tu nombre');
+      return;
+    }
+    const respuestas = [
+      { pregunta: preguntasActuales[0]._id, respuesta: formData.respuesta1 },
+      { pregunta: preguntasActuales[1]._id, respuesta: formData.respuesta2 },
+      { pregunta: preguntasActuales[2]._id, respuesta: formData.respuesta3 },
+    ];
+
+    try {
+      const res = await responderCuestionario({
+        nombreUsuario,
+        cuestionario: cuestionarioSeleccionado._id,
+        respuestas
+      });
+
+      if (res.success) {
+        alert('✅ Respuestas enviadas con éxito');
+        seleccionarRandom(cuestionarios);
+        setNombreUsuario('');
+        setFormData({ respuesta1: '', respuesta2: '', respuesta3: '' });
+        setIniciado(false);
+
+        // Aquí disparo el update de la racha
+        setTriggerStreakUpdate(prev => !prev);
+
+      } else {
+        alert('❌ Error al enviar las respuestas');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('❌ Error inesperado');
+    }
+  };
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-8">
-      <h2 className="text-3xl font-bold mb-6">Daily quest</h2>
+    <div className="bg-white rounded-xl shadow-md p-8 max-w-4xl w-full mx-auto">
+      <h2 className="text-2xl font-bold mb-4">Responder Cuestionario Diario</h2>
 
-      <div className="min-h-[250px] border-2 border-gray-300 flex items-center justify-center text-gray-500 font-semibold mb-6 rounded-xl">
-        {!showForm ? (
-          <span className="text-lg">Presiona "Start Quest" para comenzar</span>
-        ) : (
-          <div className="w-full max-w-lg relative">
-            <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden mb-6">
-              <div
-                className="h-full bg-purple-500 transition-all duration-500"
-                style={{ width: `${(step / 4) * 100}%` }}
-              ></div>
-            </div>
+      {cuestionarioSeleccionado ? (
+        <>
+          <h3 className="text-xl font-semibold mb-2 text-purple-700">
+            {cuestionarioSeleccionado.titulo}
+          </h3>
 
-            {step === 1 && (
-              <div>
-                <h2 className="text-lg font-semibold mb-4">
-                  {currentPreguntas[0]?.pregunta || "Cargando pregunta..."}
-                </h2>
-                <input
-                  name="projectName"
-                  value={formData.projectName}
-                  onChange={handleChange}
-                  type="text"
-                  className="border border-gray-300 rounded-md w-full px-4 py-2 mb-4"
-                />
-                <div className="flex justify-end">
-                  <button onClick={nextStep} className="bg-purple-600 text-white px-4 py-2 rounded-md">
-                    Next
-                  </button>
-                </div>
-              </div>
-            )}
+          <div className="flex gap-4 mb-6">
+            <button
+              onClick={() => seleccionarRandom(cuestionarios)}
+              disabled={iniciado}
+              className={`px-4 py-2 rounded ${iniciado ? 'bg-gray-300 cursor-not-allowed' : 'bg-yellow-500 text-white'}`}
+            >
+              Refrescar
+            </button>
 
-            {step === 2 && (
-              <div>
-                <h2 className="text-lg font-semibold mb-4">
-                  {currentPreguntas[1]?.pregunta || "Cargando pregunta..."}
-                </h2>
-                <input
-                  name="question1"
-                  value={formData.question1}
-                  onChange={handleChange}
-                  type="text"
-                  className="border border-gray-300 rounded-md w-full px-4 py-2 mb-4"
-                />
-                <div className="flex justify-between">
-                  <button onClick={prevStep} className="text-purple-600 px-4 py-2">Back</button>
-                  <button onClick={nextStep} className="bg-purple-600 text-white px-4 py-2 rounded-md">Next</button>
-                </div>
-              </div>
-            )}
-
-            {step === 3 && (
-              <div>
-                <h2 className="text-lg font-semibold mb-4">
-                  {currentPreguntas[2]?.pregunta || "Cargando pregunta..."}
-                </h2>
-                <input
-                  name="question2"
-                  value={formData.question2}
-                  onChange={handleChange}
-                  type="text"
-                  className="border border-gray-300 rounded-md w-full px-4 py-2 mb-4"
-                />
-                <div className="flex justify-between">
-                  <button onClick={prevStep} className="text-purple-600 px-4 py-2">Back</button>
-                  <button onClick={nextStep} className="bg-purple-600 text-white px-4 py-2 rounded-md">Next</button>
-                </div>
-              </div>
-            )}
-
-            {step === 4 && (
-              <div>
-                <h2 className="text-lg font-semibold mb-4">¿Deseas enviar este quest?</h2>
-                <div className="flex justify-between">
-                  <button onClick={prevStep} className="text-purple-600 px-4 py-2">Back</button>
-                  <button onClick={handleSubmit} className="bg-green-600 text-white px-4 py-2 rounded-md">Submit</button>
-                </div>
-              </div>
-            )}
+            <button
+              onClick={() => setIniciado(true)}
+              disabled={!puedeIniciar || iniciado}
+              className={`px-4 py-2 rounded bg-blue-600 text-white ${(!puedeIniciar || iniciado) ? 'opacity-50 cursor-not-allowed' : ''}`}
+              title={!puedeIniciar ? 'Solo puedes responder una vez cada 12 horas' : ''}
+            >
+              Iniciar
+            </button>
           </div>
-        )}
-      </div>
+        </>
+      ) : (
+        <p>Cargando cuestionario...</p>
+      )}
 
-      <div className="flex gap-4 mb-6">
-        <button
-          className={`border px-6 py-2 rounded-md shadow ${
-            reloadCount >= maxReloads
-              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-              : 'bg-white border-gray-300 hover:bg-gray-100'
-          }`}
-          disabled={reloadCount >= maxReloads}
-          onClick={reloadQuest}
-        >
-          Reload this quest ({maxReloads - reloadCount} attempts left)
-        </button>
+      {iniciado && preguntasActuales.length >= 3 && (
+        <div className="max-w-xl mx-auto">
+          <div className="w-full h-2 bg-gray-200 rounded-full mb-6">
+            <div className="h-full bg-purple-600 transition-all" style={{ width: `${(step / 4) * 100}%` }}></div>
+          </div>
 
-        <button
-          className="bg-purple-600 text-white px-6 py-2 rounded-md shadow hover:bg-purple-700"
-          onClick={() => setShowForm(true)}
-        >
-          Start quest
-        </button>
-      </div>
+          {step === 1 && (
+            <div>
+              <label className="block mb-2 font-semibold">Tu nombre:</label>
+              <input
+                type="text"
+                value={nombreUsuario}
+                onChange={(e) => setNombreUsuario(e.target.value)}
+                className="w-full border border-gray-300 px-4 py-2 rounded mb-4"
+              />
 
-      {/* Listado de formularios */}
-      <div>
-        <h3 className="text-xl font-bold mb-4">Tus formularios enviados</h3>
-        <ul className="space-y-2">
-          {formularios.map((form) => (
-            <li key={form._id} className="p-3 bg-gray-100 rounded-md shadow-sm">
-              <p><strong>Nombre:</strong> {form.nombreUsuario}</p>
-              <ul className="ml-4 list-disc">
-                {form.preguntas.map((p, i) => (
-                  <li key={p._id}>
-                    <strong>Pregunta:</strong> {p.pregunta} <br />
-                    <strong>Respuesta:</strong> {p.respuesta}
-                  </li>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </ul>
-      </div>
+              <label className="block mb-2 font-semibold">{preguntasActuales[0].pregunta}</label>
+              <input
+                name="respuesta1"
+                value={formData.respuesta1}
+                onChange={handleChange}
+                type="text"
+                className="w-full border px-4 py-2 rounded"
+              />
+
+              <div className="flex justify-end mt-4">
+                <button onClick={() => setStep(2)} className="bg-purple-600 text-white px-4 py-2 rounded">Next</button>
+              </div>
+            </div>
+          )}
+
+          {step === 2 && (
+            <div>
+              <label className="block mb-2 font-semibold">{preguntasActuales[1].pregunta}</label>
+              <input
+                name="respuesta2"
+                value={formData.respuesta2}
+                onChange={handleChange}
+                type="text"
+                className="w-full border px-4 py-2 rounded"
+              />
+
+              <div className="flex justify-between mt-4">
+                <button onClick={() => setStep(1)} className="text-purple-600 px-4 py-2">Back</button>
+                <button onClick={() => setStep(3)} className="bg-purple-600 text-white px-4 py-2 rounded">Next</button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div>
+              <label className="block mb-2 font-semibold">{preguntasActuales[2].pregunta}</label>
+              <input
+                name="respuesta3"
+                value={formData.respuesta3}
+                onChange={handleChange}
+                type="text"
+                className="w-full border px-4 py-2 rounded"
+              />
+
+              <div className="flex justify-between mt-4">
+                <button onClick={() => setStep(2)} className="text-purple-600 px-4 py-2">Back</button>
+                <button onClick={() => setStep(4)} className="bg-purple-600 text-white px-4 py-2 rounded">Next</button>
+              </div>
+            </div>
+          )}
+
+          {step === 4 && (
+            <div>
+              <p className="mb-4 font-semibold">¿Estás listo para enviar tus respuestas?</p>
+              <div className="flex justify-between">
+                <button onClick={() => setStep(3)} className="text-purple-600 px-4 py-2">Back</button>
+                <button onClick={handleSubmit} className="bg-green-600 text-white px-4 py-2 rounded">Enviar</button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      <StreakSummary triggerUpdate={triggerStreakUpdate} onStreakChange={(val) => {
+        // Si quieres recibir la racha actualizada aquí, puedes manejarla
+        // Ejemplo: console.log('Racha actualizada:', val);
+      }} />
+
+      {respuestasEnviadas && (
+        <div className="mt-10 border-t pt-6">
+          <h3 className="text-xl font-semibold mb-2 text-green-600">Respuestas Enviadas</h3>
+          <p className="mb-2"><strong>Título:</strong> {respuestasEnviadas.titulo}</p>
+          <ul className="list-disc ml-6 space-y-2">
+            {respuestasEnviadas.preguntas.map((p, idx) => (
+              <li key={p._id}>
+                <strong>{p.pregunta}</strong>: {respuestasEnviadas.respuestas[idx]}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 };
