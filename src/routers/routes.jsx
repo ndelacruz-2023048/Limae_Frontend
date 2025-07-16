@@ -26,7 +26,7 @@ const router = createBrowserRouter([
                 element:<HomeLimae/>
             },
             {
-                path:"/detalle-reporte",
+                path:"/detalle-reporte/:reporteId",
                 element:<DetalleReporte/>
             },
             {
