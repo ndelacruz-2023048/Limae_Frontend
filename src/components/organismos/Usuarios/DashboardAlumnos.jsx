@@ -5,11 +5,12 @@ import './dashboardAlumnos.css'
 import { obtenerReportesRequest, reportePorIdRequest } from '../../../services/api'
 import { toast } from 'react-toastify'
 import Carousel from './Carousel'
+import { ReportModal } from '../modal/ReportModal'
 
 export const DashboardAlumnos = () => {
   const [ reportes, setReportes] = useState([])
   const [reporteSeleccionado, setReporteSeleccionado] = useState(null)
-
+  const [openReportModal, setOpenReportModal] = useState(false);
   useEffect(()=>{
     const fetchReportes = async()=>{
       const res = await obtenerReportesRequest()
@@ -108,7 +109,7 @@ export const DashboardAlumnos = () => {
               </ol>
             </div>
           ) : (
-            <div className="card-nuevo-reporte flex flex-col items-center justify-center h-full w-full py-24">
+            <div className="card-nuevo-reporte flex flex-col items-center justify-center h-full w-full py-24" onClick={()=>{setOpenReportModal(true)}}>
               <img
                 src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png"
                 alt="No files found"
@@ -120,11 +121,12 @@ export const DashboardAlumnos = () => {
                 Por favor selecciona uno o crea uno nuevo.
               </p>
               <div className="boton-nuevo-container">
-                <button className="boton-nuevo-reporte px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition" onClick={() => alert("Aquí iría el formulario")}>Crear nuevo reporte</button>
+                <button className="boton-nuevo-reporte px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition" onClick={()=>{setOpenReportModal(true)}}>Crear nuevo reporte</button>
               </div>
             </div>
           )}
         </main>
+        <ReportModal isOpen={openReportModal} onClose={() => setOpenReportModal(false)} />
       </div>
     </>
   )
