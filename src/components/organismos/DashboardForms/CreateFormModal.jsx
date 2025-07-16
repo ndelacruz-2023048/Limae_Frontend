@@ -64,13 +64,6 @@ export const CreateFormModal = ({ onClose }) => {
           </div>
         ))}
 
-        <button
-          onClick={handleAddPregunta}
-          className="mb-4 text-blue-600 hover:underline"
-        >
-          ➕ Agregar otra pregunta
-        </button>
-
         <div className="flex justify-end gap-4">
           <button
             onClick={onClose}

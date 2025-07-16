@@ -1,12 +1,36 @@
 import React, { useState } from "react";
 import { Icon } from "@iconify/react";
 import { NavLink } from "react-router";
-import { LinksSidebar } from "../utils/DataEstatica";
+import { LinksSidebar } from "../utils/DataEstatica.js";
 import { ReportModal } from "../components/organismos/modal/ReportModal";
+import { UserAuth } from '../context/AuthContext';
+import { jwtDecode } from 'jwt-decode';
+import { useLogout } from "../hooks/useLogout.jsx";
 
 export const Sidebar = () => {
   const [openReportModal, setOpenReportModal] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { user } = UserAuth();
+  const [isOpen, setIsOpen] = useState(false)
+  
+
+  const { logout } = useLogout()
+
+    const handleLogoutClick  = ()=> {
+        logout()
+    }
+
+  let userRole = "STUDENT"; // Valor por defecto
+  if (user) {
+    try {
+      const decoded = jwtDecode(user);
+      userRole = decoded?.role || "STUDENT";
+    } catch (e) {
+      console.error('Error al decodificar el token:', e);
+    }
+  }
+  // Filtrar los links según el rol
+  const filteredLinks = LinksSidebar.filter(link => link.roles.includes(userRole));
 
   const handleToggleMobile = () => {
     setMobileOpen(!mobileOpen);
@@ -21,7 +45,7 @@ export const Sidebar = () => {
       {/* Sidebar para escritorio */}
       <aside className="hidden md:flex flex-col items-center w-[100px]" style={{ minWidth: "80px", maxWidth: "120px" }}>
         <div className="flex flex-col items-center w-full" style={{ gap: "8%", marginTop: "8%", height: "80%" }}>
-          {LinksSidebar.map(({ name, to }) => (
+          {filteredLinks.map(({ name, to }) => (
             <NavLink
               to={to}
               key={name}
@@ -52,7 +76,7 @@ export const Sidebar = () => {
             className="w-[60%] aspect-square flex items-center justify-center rounded-full bg-white text-gray-500 hover:bg-gray-200"
             style={{ minWidth: 48, maxWidth: 64 }}
           >
-            <Icon icon="mdi:cog-outline" width="28" height="28" />
+            <Icon icon="hugeicons:logout-05" width="28" height="28" onClick={handleLogoutClick} />
           </button>
         </div>
       </aside>
@@ -82,7 +106,7 @@ export const Sidebar = () => {
             </div>
 
             <div className="flex flex-col gap-4">
-              {LinksSidebar.map(({ name, to }) => (
+              {filteredLinks.map(({ name, to, title }) => (
                 <NavLink
                   to={to}
                   key={name}
@@ -96,7 +120,7 @@ export const Sidebar = () => {
                   }
                 >
                   <Icon icon={name} width="20" height="20" />
-                  <span className="text-sm">Opción</span>
+                  <span className="text-sm">{title}</span>
                 </NavLink>
               ))}
             </div>
@@ -117,9 +141,9 @@ export const Sidebar = () => {
 
               <button
                 className="flex items-center gap-3 px-4 py-2 rounded-md bg-gray-100 text-gray-700 hover:bg-gray-200"
-              >
-                <Icon icon="mdi:cog-outline" width="20" height="20" />
-                <span className="text-sm">Ajustes</span>
+              onClick={handleLogoutClick} >
+                <Icon icon="hugeicons:logout-05" width="20" height="20" />
+                <span className="text-sm">Cerrar Sesión</span>
               </button>
             </div>
           </aside>
