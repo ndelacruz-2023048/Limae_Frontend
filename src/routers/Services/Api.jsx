@@ -12,6 +12,7 @@ const apiClient = axios.create(
 
 let isRefreshing = false;
 let failedQueue = [];
+let isLoggingOut = false; // Nueva flag para controlar el logout
 
 // Variable para almacenar la función de actualización del contexto
 let refreshAuthContextCallback = null;
@@ -19,6 +20,11 @@ let refreshAuthContextCallback = null;
 // Función para establecer el callback del contexto
 export const setAuthContextCallback = (callback) => {
     refreshAuthContextCallback = callback;
+};
+
+// Función para marcar que se está haciendo logout
+export const setLoggingOut = (value) => {
+    isLoggingOut = value;
 };
 
 const processQueue = (error, token = null) => {
@@ -46,11 +52,12 @@ apiClient.interceptors.response.use(
     async error => {
         const originalRequest = error.config;
 
-        // Solo intentamos refrescar si es un error 401 y no es la ruta de refresh
+        // Solo intentamos refrescar si es un error 401, no es la ruta de refresh y no estamos haciendo logout
         if (
         error.response?.status === 401 &&
         !originalRequest._retry &&
-        originalRequest.url !== '/Auth/refresh'
+        originalRequest.url !== '/Auth/refresh' &&
+        !isLoggingOut
         ) {
         if (isRefreshing) {
             return new Promise((resolve, reject) => {

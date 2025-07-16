@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { logoutRequest } from '../routers/Services/Api'
+import { logoutRequest, setLoggingOut } from '../routers/Services/Api'
 import { UserAuth } from '../context/AuthContext'
 import { useNavigate } from 'react-router'
 import { toast } from 'sonner'
@@ -14,6 +14,7 @@ export const useLogout = () => {
     const logout = async () => {
         setIsLoadingLogout(true)
         setErrorLogout(false)
+        setLoggingOut(true) // Marcar que estamos haciendo logout
 
         const response = await logoutRequest(); 
 
@@ -21,6 +22,7 @@ export const useLogout = () => {
 
         if (response?.error) {
             setErrorLogout(true)
+            setLoggingOut(false) // Resetear la flag si hay error
             toast.error('Error al cerrar sesión')
             console.error('Error al cerrar sesión:', response.e)
             return false;
@@ -36,6 +38,7 @@ export const useLogout = () => {
             }
         }
         clearAuthUser();
+        setLoggingOut(false) // Resetear la flag después del logout
         navigate('/login')
         toast.success(`Sesión cerrada exitosamente, hasta pronto ${userName || ''}`)
         return true
