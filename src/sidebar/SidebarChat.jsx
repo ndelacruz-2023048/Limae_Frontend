@@ -9,7 +9,7 @@ export const SidebarChat = ({ onUserSelect }) => {
     const { isOnline } = UserAuth()
 
     return (
-        <aside className="lg:w-64 2xl:lg:w-64 h-full shadow-md rounded-lg p-2 sm:p-4">
+        <aside className="lg:w-64 2xl:lg:w-64 h-full shadow-md rounded-lg p-2 sm:p-4 overflow-y-auto">
             <h2 className="text-lg font-semibold">Chats</h2>
             {loading ? (
                 <FadeLoader />
